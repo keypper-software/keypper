@@ -1,0 +1,15 @@
+{
+  "name": "cli",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'dev script'",
+    "build": "echo 'build script'",
+    "test": "echo 'test script'",
+    "lint": "echo 'lint script'"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*"
+  }
+}

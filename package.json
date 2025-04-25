@@ -2,11 +2,23 @@
   "name": "keypper",
   "private": true,
   "scripts": {
+    "start": "turbo run start",
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "check-types": "turbo run check-types",
+    "web:dev": "turbo run --filter=web dev",
+    "web:start": "turbo run --filter=web start",
+    "web:build": "turbo run --filter=web build",
+    "web:db:sync": "turbo run --filter=web db:sync",
+    "web:db:migrate": "turbo run --filter=web db:migrate",
+    "cli:dev": "turbo run --filter=cli dev",
+    "cli:start": "turbo run --filter=cli start",
+    "cli:build": "turbo run --filter=cli build",
+    "docs:dev": "turbo run --filter=docs dev",
+    "docs:start": "turbo run --filter=docs start",
+    "docs:build": "turbo run --filter=docs build"
   },
   "devDependencies": {
     "prettier": "^3.5.3",
@@ -14,9 +26,9 @@
     "typescript": "5.8.2"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=21"
   },
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "npm@10.9.2",
   "workspaces": [
     "apps/*",
     "packages/*"
