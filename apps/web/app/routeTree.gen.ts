@@ -21,6 +21,7 @@ import { Route as authSignupImport } from './routes/(auth)/signup'
 import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as AuthenticatedWorkspaceSlugWelcomeImport } from './routes/_authenticated/$workspaceSlug/welcome'
 import { Route as AuthenticatedWorkspaceSlugDashboardImport } from './routes/_authenticated/$workspaceSlug/_dashboard'
+import { Route as authAuthCliImport } from './routes/(auth)/auth.cli'
 import { Route as AuthenticatedWorkspaceSlugDashboardIndexImport } from './routes/_authenticated/$workspaceSlug/_dashboard/index'
 import { Route as AuthenticatedWorkspaceSlugDashboardGettingStartedImport } from './routes/_authenticated/$workspaceSlug/_dashboard/getting-started'
 import { Route as AuthenticatedWorkspaceSlugDashboardProjectsIndexImport } from './routes/_authenticated/$workspaceSlug/_dashboard/projects/index'
@@ -93,6 +94,12 @@ const AuthenticatedWorkspaceSlugDashboardRoute =
     id: '/_dashboard',
     getParentRoute: () => AuthenticatedWorkspaceSlugRoute,
   } as any)
+
+const authAuthCliRoute = authAuthCliImport.update({
+  id: '/(auth)/auth/cli',
+  path: '/auth/cli',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthenticatedWorkspaceSlugDashboardIndexRoute =
   AuthenticatedWorkspaceSlugDashboardIndexImport.update({
@@ -200,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof authSignupImport
+      parentRoute: typeof rootRoute
+    }
+    '/(auth)/auth/cli': {
+      id: '/(auth)/auth/cli'
+      path: '/auth/cli'
+      fullPath: '/auth/cli'
+      preLoaderRoute: typeof authAuthCliImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/$workspaceSlug': {
@@ -369,6 +383,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
+  '/auth/cli': typeof authAuthCliRoute
   '/$workspaceSlug': typeof AuthenticatedWorkspaceSlugDashboardRouteWithChildren
   '/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
   '/$workspaceSlug/getting-started': typeof AuthenticatedWorkspaceSlugDashboardGettingStartedRoute
@@ -388,6 +403,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
+  '/auth/cli': typeof authAuthCliRoute
   '/$workspaceSlug': typeof AuthenticatedWorkspaceSlugDashboardIndexRoute
   '/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
   '/$workspaceSlug/getting-started': typeof AuthenticatedWorkspaceSlugDashboardGettingStartedRoute
@@ -406,6 +422,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/(auth)/auth/cli': typeof authAuthCliRoute
   '/_authenticated/$workspaceSlug': typeof AuthenticatedWorkspaceSlugRouteWithChildren
   '/_authenticated/$workspaceSlug/_dashboard': typeof AuthenticatedWorkspaceSlugDashboardRouteWithChildren
   '/_authenticated/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
@@ -428,6 +445,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/login'
     | '/signup'
+    | '/auth/cli'
     | '/$workspaceSlug'
     | '/$workspaceSlug/welcome'
     | '/$workspaceSlug/getting-started'
@@ -446,6 +464,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/login'
     | '/signup'
+    | '/auth/cli'
     | '/$workspaceSlug'
     | '/$workspaceSlug/welcome'
     | '/$workspaceSlug/getting-started'
@@ -462,6 +481,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/(auth)/login'
     | '/(auth)/signup'
+    | '/(auth)/auth/cli'
     | '/_authenticated/$workspaceSlug'
     | '/_authenticated/$workspaceSlug/_dashboard'
     | '/_authenticated/$workspaceSlug/welcome'
@@ -483,6 +503,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   authLoginRoute: typeof authLoginRoute
   authSignupRoute: typeof authSignupRoute
+  authAuthCliRoute: typeof authAuthCliRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -492,6 +513,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   authLoginRoute: authLoginRoute,
   authSignupRoute: authSignupRoute,
+  authAuthCliRoute: authAuthCliRoute,
 }
 
 export const routeTree = rootRoute
@@ -509,7 +531,8 @@ export const routeTree = rootRoute
         "/auth",
         "/onboarding",
         "/(auth)/login",
-        "/(auth)/signup"
+        "/(auth)/signup",
+        "/(auth)/auth/cli"
       ]
     },
     "/": {
@@ -532,6 +555,9 @@ export const routeTree = rootRoute
     },
     "/(auth)/signup": {
       "filePath": "(auth)/signup.tsx"
+    },
+    "/(auth)/auth/cli": {
+      "filePath": "(auth)/auth.cli.tsx"
     },
     "/_authenticated/$workspaceSlug": {
       "filePath": "_authenticated/$workspaceSlug",
