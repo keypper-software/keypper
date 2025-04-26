@@ -4,7 +4,6 @@ import ora from "ora";
 import server from "./server";
 import { SERVER_PORT } from "./constants";
 import getColor from "./utils/get-color";
-import { GracefulShutdownManager } from "@moebius/http-graceful-shutdown";
 import cliSpinners from "cli-spinners";
 const cli = new Command();
 export const log = ora({});

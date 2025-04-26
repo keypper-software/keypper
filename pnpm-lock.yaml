@@ -20,9 +20,6 @@ importers:
 
   apps/cli:
     dependencies:
-      '@moebius/http-graceful-shutdown':
-        specifier: ^1.1.0
-        version: 1.1.0
       cli-spinners:
         specifier: ^3.2.0
         version: 3.2.0
@@ -1568,9 +1565,6 @@ packages:
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
     engines: {node: '>=18'}
     hasBin: true
-
-  '@moebius/http-graceful-shutdown@1.1.0':
-    resolution: {integrity: sha512-cjODgYTIGuCwgsuVMZNDh8RBK697ULAoQAmLqMVpqnqF3nOlPaJHqtGrdLooyn81l83wzHYwG6kPvEIv+Fo+sQ==}
 
   '@netlify/binary-info@1.0.0':
     resolution: {integrity: sha512-4wMPu9iN3/HL97QblBsBay3E1etIciR84izI3U+4iALY+JHCrI+a2jO0qbAZ/nxKoegypYEaiiqWXylm+/zfrw==}
@@ -8136,8 +8130,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-
-  '@moebius/http-graceful-shutdown@1.1.0': {}
 
   '@netlify/binary-info@1.0.0': {}
 
