@@ -26,10 +26,10 @@ serverEvent.on("stop-server", (token) => {
     serverEvent.removeAllListeners();
 
     log.text = getColor({ text: "", color: "GREEN" });
-    log.clear()
+    log.clear();
     log.stop();
 
-    console.log("Save to file", token);
+    console.log("> Token Saved");
     process.exit(0);
   }, 1000);
 });

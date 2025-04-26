@@ -16,7 +16,7 @@ __DEV__ && server.use(morgan("dev"));
 
 server.post(SERVER_AUTH_CALLBACK_URL, async (req: Request, res: Response) => {
   try {
-    const token = "JETTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+    const token = "<TO-KEN>"
     serverEvent.stop(token);
     res.end();
   } catch (error) {
