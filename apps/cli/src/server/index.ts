@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import morgan from "morgan";
+import morgan, { token } from "morgan";
 import { SERVER_AUTH_CALLBACK_URL } from "../constants";
 import { serverEvent } from "../events/server-events";
 
@@ -16,7 +16,8 @@ __DEV__ && server.use(morgan("dev"));
 
 server.post(SERVER_AUTH_CALLBACK_URL, async (req: Request, res: Response) => {
   try {
-    serverEvent.stop();
+    const token = "JETTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+    serverEvent.stop(token);
     res.end();
   } catch (error) {
     res.status(500).json({ message: "Internal Server Error" });

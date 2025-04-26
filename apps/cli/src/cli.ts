@@ -16,26 +16,22 @@ serverEvent.on("start-server", () => {
       text: "Waiting For Authentication",
       color: "CYAN",
     });
-    // console.log("Server started", SERVER_PORT);
   });
 });
 
-serverEvent.on("stop-server", () => {
-  console.log(expressServer);
+serverEvent.on("stop-server", (token) => {
   log.text = getColor({ text: "Authentcation Successfull", color: "GREEN" });
   log.spinner = cliSpinners.smiley;
   setTimeout(() => {
-    const shutdownManager = new GracefulShutdownManager(expressServer);
-    shutdownManager.terminate(() => {});
     expressServer?.close?.();
+    serverEvent.removeAllListeners();
+
+    log.text = getColor({ text: "", color: "GREEN" });
+    log.clear()
     log.stop();
-    const gracefulExit = () => {
-      expressServer?.close?.();
-    };
-    process.on("SIGTERM", gracefulExit);
-    process.on("SIGINT", gracefulExit);
-    console.log("exit")
-    // process.exit(0);
+
+    console.log("Save to file", token);
+    process.exit(0);
   }, 1000);
 });
 export default cli;

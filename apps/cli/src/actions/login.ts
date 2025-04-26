@@ -17,8 +17,10 @@ export default async () => {
     });
     serverEvent.start();
   } catch (error) {
+    log.text = getColor({ text: "Authentcation Timeout", color: "RED" });
+    log.clear()
+    log.stop();
+    process.exit(1);
   } finally {
-    // log.text = getColor({ text: "Authentcation Timeout", color: "RED" });
-    // log.stop();
   }
 };
