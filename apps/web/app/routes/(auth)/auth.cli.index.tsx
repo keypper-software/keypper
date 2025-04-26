@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "~/components/interface/button";
 import Card from "~/components/interface/card";
 import { Input } from "~/components/interface/input";
 import { APP_NAME } from "~/lib/constants";
-export const Route = createFileRoute("/(auth)/auth/cli")({
+export const Route = createFileRoute("/(auth)/auth/cli/")({
   component: RouteComponent,
   head: () => ({
     meta: [
@@ -26,9 +26,12 @@ function RouteComponent() {
     setAuthPhrase("");
   };
 
+  const navigate = useNavigate();
+
   const completeAuth = async () => {
     setIsAuthPhraseValid(true);
     setAuthPhrase("");
+    navigate({ to: "/auth/cli/complete" });
   };
 
   return (
