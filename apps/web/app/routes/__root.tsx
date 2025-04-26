@@ -1,4 +1,5 @@
 import {
+  HeadContent,
   Outlet,
   ScrollRestoration,
   createRootRoute,
@@ -57,6 +58,7 @@ function RootComponent() {
       <Toaster richColors />
       <QueryClientProvider client={queryClient}>
         <Outlet />
+        <HeadContent />
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </RootDocument>
@@ -67,6 +69,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html>
       <head>
+        <link rel="shortcut icon" href="/logo/icon.png" type="image/png" />
         <Meta />
       </head>
       <body>

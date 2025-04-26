@@ -72,10 +72,10 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
                       setSecretValue(e.target.value);
                       props.onChange?.(e);
                     }}
-                    // className={cn(
-                    //   isChanged && "border-yellow-500 focus:border-yellow-500",
-                    //   className
-                    // )}
+                    className={cn(
+                      isChanged && "border-yellow-500 focus:border-yellow-500",
+                      className
+                    )}
                   />
                   <button
                     className="absolute right-[6rem] text-gray-500"
