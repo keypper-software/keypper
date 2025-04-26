@@ -10,10 +10,10 @@
     "start": "vinxi start",
     "lint": "echo Skipping linting for web",
     "check-types": "tsc --noEmit",
-    "db:push": "npx drizzle-kit push",
-    "db:generate": "npx drizzle-kit generate",
-    "db:migrate": "npx drizzle-kit migrate",
-    "db:sync": "yarn db:push && yarn db:generate"
+    "db:push": "pnpm dlx drizzle-kit push",
+    "db:generate": "pnpm dlx drizzle-kit generate",
+    "db:migrate": "pnpm dlx drizzle-kit migrate",
+    "db:sync": "pnpm db:push && pnpm db:generate"
   },
   "keywords": [],
   "author": "",
