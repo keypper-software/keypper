@@ -3,13 +3,34 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "echo 'dev script'",
-    "build": "echo 'build script'",
+    "dev": "tsnd --respawn src/index.ts",
+    "build": "tsc",
+    "start": "node build/index.js",
     "test": "echo 'test script'",
-    "lint": "echo 'lint script'"
+    "lint": "echo 'lint script'",
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*"
+    "@repo/typescript-config": "workspace:*",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/helmet": "^4.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.14.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@moebius/http-graceful-shutdown": "^1.1.0",
+    "cli-spinners": "^3.2.0",
+    "commander": "^13.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0",
+    "open": "^10.1.1",
+    "ora": "^8.2.0"
   }
 }
