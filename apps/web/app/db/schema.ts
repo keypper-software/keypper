@@ -80,3 +80,32 @@ export const auditLog = pgTable("audit_log", {
     .references(() => project.id),
   details: text("details"),
 });
+
+export const authPhrase = pgTable("auth_phrase", {
+  id: text("id").primaryKey(),
+  phrase: text("phrase").notNull(),
+  userName: text("user_name").notNull(),
+  machineName: text("machine_name").notNull(),
+  operatingSystem: text("operating_system").notNull(),
+  createdAt: timestamp("created_at").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const authToken = pgTable("auth_token", {
+  id: text("id").primaryKey(),
+  token: text("token").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  machineName: text("machine_name").notNull(),
+  operatingSystem: text("operating_system").notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").notNull(),
+  revokedAt: timestamp("revoked_at"),
+  updatedAt: timestamp("updated_at").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  authPhraseId: text("auth_phrase_id")
+    .notNull()
+    .references(() => authPhrase.id),
+});
