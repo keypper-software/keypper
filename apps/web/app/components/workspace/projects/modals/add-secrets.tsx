@@ -50,7 +50,8 @@ export default function AddSecretsDialog({
     const parsedSecrets = lines
       .map((line) => {
         const [key, ...valueParts] = line.split("=").map((part) => part.trim());
-        const value = valueParts.join("=").trim();
+        const rawValue = valueParts.join("=").trim();
+        const value = rawValue.replace(/^(['"])(.*)\1$/, "$2");
         if (!key.startsWith("#")) {
           return { key, value };
         }
