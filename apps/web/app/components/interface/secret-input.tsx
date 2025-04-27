@@ -49,7 +49,10 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
             <TooltipTrigger asChild className="relative">
               {hideValue || !value ? (
                 <div
-                  className="w-full h-10 rounded-xl border border-gray-001 bg-background px-3 py-2 text-sm focus:outline-none focus:border-accent disabled:cursor-not-allowed disabled:opacity-50 hover:bg-accent/5 focus:bg-transparent cursor-pointer flex items-center"
+                  className={cn(
+                    "w-full h-10 rounded-xl border border-gray-001 bg-background px-3 py-2 text-sm focus:outline-none focus:border-accent disabled:cursor-not-allowed disabled:opacity-50 hover:bg-accent/5 focus:bg-transparent cursor-pointer flex items-center",
+                    isChanged && "border-yellow-500 focus:border-yellow-500"
+                  )}
                   onMouseEnter={() => setIsHovered(true)}
                   onMouseLeave={() => setIsHovered(false)}
                   onClick={props.onClick}
@@ -72,10 +75,10 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
                       setSecretValue(e.target.value);
                       props.onChange?.(e);
                     }}
-                    // className={cn(
-                    //   isChanged && "border-yellow-500 focus:border-yellow-500",
-                    //   className
-                    // )}
+                    className={cn(
+                      isChanged && "border-yellow-500 focus:border-yellow-500",
+                      className
+                    )}
                   />
                   <button
                     className="absolute right-[6rem] text-gray-500"
