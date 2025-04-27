@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user, organization } from "../../auth-schema";
 
@@ -89,11 +89,13 @@ export const authPhrase = pgTable("auth_phrase", {
   operatingSystem: text("operating_system").notNull(),
   createdAt: timestamp("created_at").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").notNull().default(false),
 });
 
 export const authToken = pgTable("auth_token", {
   id: text("id").primaryKey(),
   token: text("token").notNull(),
+  firstFourCharacters: text("first_four_characters").notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(),
   machineName: text("machine_name").notNull(),
