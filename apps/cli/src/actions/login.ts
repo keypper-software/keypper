@@ -9,119 +9,158 @@ import storage from "../utils/storage";
 import { VERSION, AUTH_UPDATE_INTERVAL } from "../constants/index";
 
 export default async () => {
-  log.text = "Please wait";
+  log.text = "Initializing authentication";
   log.start();
+
   try {
-    const store = await storage();
     console.clear();
+
+    const store = await storage();
+
     const { os, user, machine } = getMachineInfo();
+
     const { data: initLogin } = await initializeLogin({
       machineName: machine,
       operatingSystem: os,
       userName: user,
     });
-    log.text = "Opening the Browser";
+
+    if (!initLogin || !initLogin.id || !initLogin.phrase) {
+      throw new Error(
+        "Failed to initialize login: Invalid response from server"
+      );
+    }
+
     await store.writeToStore({
       _auth: {
         preId: initLogin.id,
-        phrase: initLogin.phrase, // TODO:[]:encrypt:
-        // IDEA:
-        // ENCRYPT THE PHRASE USING THE ID or prease
+        phrase: initLogin.phrase,
         exTimestamp: Date.parse(initLogin.expiresAt),
         timestamp: Date.now(),
       },
     });
+
     console.clear();
-    console.log(
-      getColor({ text: "Paste these words to Authenticate:", color: "WHITE" })
-    );
+    console.log("Paste these phrase to authenticate:");
     console.log(getColor({ text: initLogin.phrase, color: "GREEN" }));
-    const url = getUrl(`auth/cli?medium=cli&phrase=${initLogin.phrase}`);
-    await open(url, {
-      wait: true,
-    });
+
+    log.text = "Opening browser for authentication";
+    const url = getUrl(
+      `auth/cli?medium=cli&phrase=${encodeURIComponent(initLogin.phrase)}`
+    );
+
+    try {
+      await open(url, { wait: false });
+      // throw new Error("Browser opening is disabled for testing purposes");
+    } catch (openError) {
+      console.log(
+        getColor({
+          text: "⚠️ Could not automatically open browser",
+          color: "YELLOW",
+        })
+      );
+      console.log(`Please open this URL manually: ${url}`);
+    }
 
     log.text = getColor({
-      text: "Waiting for Authentication",
+      text: "Waiting for authentication...",
       color: "CYAN",
     });
 
-    // CHECK FOR UPDATE;
-    let expires = new Date(initLogin.expiresAt);
+    const expiresAt = new Date(initLogin.expiresAt);
+    let authVerified = false;
+
     const updates = setInterval(async () => {
       try {
-        let now = new Date();
-        if (now > expires) {
+        // Check if auth has expired
+        const now = new Date();
+        if (now > expiresAt) {
           clearInterval(updates);
-          log.clear();
-          log.stop();
-          log.stopAndPersist();
-          console.clear();
-          console.log(
-            getColor({
-              text: "❌ Authentication Timeout",
-              color: "RED",
-            })
-          );
-          console.log(
-            "REASON: Authentication Timeout, Make you paste the phrase in the opened browser tab or visit https://docs.keypper.dev/v1/cli?troubleshoot=cli-authentication-timeout"
-          );
-          throw new Error("Authentication Timeout");
+          throw new Error("Authentication timeout - please try again");
         }
-        // console.log(expires, count)
-        log.text = getColor({
-          text: `Waiting for Authentication`,
-          color: "CYAN",
-        });
+
         const readStore = await store.readFromStore();
         if (!readStore?._auth?.preId) {
           clearInterval(updates);
-          throw new Error("Invalid Authorization");
+          throw new Error("Invalid authorization state");
         }
 
         const { data: credentials } = await verifyLogin({
           auth_phrase_id: readStore._auth.preId,
         });
 
+        if (!credentials || !credentials.token) {
+          return;
+        }
+
+        authVerified = true;
+        clearInterval(updates);
+
         await store.writeToStore({
           ...readStore,
           _auth: {
-            ...readStore?._auth,
+            ...readStore._auth,
             session: {
               id: credentials.token,
               version: VERSION,
             },
+            timestamp: Date.now(),
           },
         });
-        log.clear();
+
         log.stop();
-        log.stopAndPersist();
         console.clear();
         console.log(
           getColor({
-            text: "✅ Authentication Successful",
+            text: "✅ Authentication successful",
             color: "GREEN",
           })
         );
         console.log(
-          "Run keypper --help to learn more about Keypper cli or visit https://docs.keypper.dev"
+          "Run keypper --help to learn more about Keypper CLI or visit https://docs.keypper.dev"
         );
-        clearInterval(updates);
+
         process.exit(0);
-      } catch (error: any) {
-        // console.log(error)
+      } catch (pollError: any) {
+        if (
+          pollError?.message.includes("timeout") ||
+          pollError?.message.includes("Invalid authorization")
+        ) {
+          clearInterval(updates);
+          handleError(pollError);
+        }
       }
     }, AUTH_UPDATE_INTERVAL);
   } catch (error) {
-    log.text = getColor({ text: "❌ Authentication Cancel", color: "RED" });
-    console.log(
-      "REASON:",
-      isAxiosError(error)
-        ? error?.response?.data?.error
-        : "Failed to connect to the server"
-    );
-    process.exit(0);
-  } finally {
-    log.clear();
+    handleError(error);
   }
 };
+
+// LOGIN SPECIFICA ERRORS HANDLING
+function handleError(error: any) {
+  log.stop();
+  console.clear();
+
+  console.log(getColor({ text: "❌ Authentication failed", color: "RED" }));
+
+  const errorMessage = isAxiosError(error)
+    ? error?.response?.data?.error || "Server connection error"
+    : error?.message || "Unknown error occurred";
+
+  console.log("REASON:", errorMessage);
+
+  if (
+    errorMessage.includes("timeout") ||
+    errorMessage.includes("Authentication timeout")
+  ) {
+    console.log(
+      "For help visit: https://docs.keypper.dev/v1/cli?troubleshoot=cli-authentication-timeout"
+    );
+  } else if (errorMessage.includes("connection") || isAxiosError(error)) {
+    console.log(
+      "Check your internet connection or visit: https://docs.keypper.dev/v1/cli?troubleshoot=connection-issues"
+    );
+  }
+
+  process.exit(1);
+}
