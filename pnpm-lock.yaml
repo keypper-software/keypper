@@ -163,6 +163,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
       drizzle-orm:
         specifier: ^0.38.3
         version: 0.38.4(@types/pg@8.11.14)(@types/react@19.1.0)(kysely@0.27.6)(pg@8.15.6)(react@19.1.0)

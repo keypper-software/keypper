@@ -1,7 +1,6 @@
 import { json } from "@tanstack/start";
 import { createAPIFileRoute } from "@tanstack/start/api";
 import { db } from "~/db";
-import { environment, secret, branch } from "~/db/schema";
 import { auth } from "~/lib/auth";
 import { createDecipheriv, scryptSync } from "crypto";
 import dotenv from "dotenv";
@@ -21,37 +20,49 @@ function decrypt(text: string, secretKey: string) {
 
 export const APIRoute = createAPIFileRoute("/api/$workspaceSlug/$projectSlug")({
   GET: async ({ request, params }) => {
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    try {
+      const session = await auth.api.getSession({
+        headers: request.headers,
+      });
 
-    if (!session) {
-      return json({ error: "Unauthorized" }, { status: 401 });
+      if (!session) {
+        return json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const project = await db.query.project.findFirst({
+        where: (project, { eq }) => eq(project.slug, params.projectSlug),
+        columns: {
+          id: true,
+          name: true,
+        },
+      });
+
+      if (!project) {
+        return json({ error: "Project not found" }, { status: 404 });
+      }
+
+      const environments = await db.query.environment.findMany({
+        where: (environment, { eq }) => eq(environment.projectId, project.id),
+        columns: {
+          id: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return json({ name: project.name, environments });
+    } catch (error) {
+      console.error("Error revealing secrets:", error);
+      return json(
+        {
+          error: "Failed to reveal secrets",
+        },
+        {
+          status: 500,
+        }
+      );
     }
-
-    const project = await db.query.project.findFirst({
-      where: (project, { eq }) => eq(project.slug, params.projectSlug),
-      columns: {
-        id: true,
-        name: true,
-      },
-    });
-
-    if (!project) {
-      return json({ error: "Project not found" }, { status: 404 });
-    }
-
-    const environments = await db.query.environment.findMany({
-      where: (environment, { eq }) => eq(environment.projectId, project.id),
-      columns: {
-        id: true,
-        name: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    return json({ name: project.name, environments });
   },
 
   POST: async ({ request, params }) => {

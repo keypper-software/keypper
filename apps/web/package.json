@@ -33,6 +33,7 @@
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
+    "dotenv": "^16.5.0",
     "drizzle-orm": "^0.38.3",
     "lucide-react": "^0.469.0",
     "moment": "^2.30.1",
