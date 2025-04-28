@@ -22,7 +22,9 @@ import { Route as authLoginImport } from './routes/(auth)/login'
 import { Route as AuthenticatedWorkspaceSlugWelcomeImport } from './routes/_authenticated/$workspaceSlug/welcome'
 import { Route as AuthenticatedWorkspaceSlugDashboardImport } from './routes/_authenticated/$workspaceSlug/_dashboard'
 import { Route as AuthenticatedWorkspaceSlugDashboardIndexImport } from './routes/_authenticated/$workspaceSlug/_dashboard/index'
+import { Route as authAuthCliIndexImport } from './routes/(auth)/auth.cli.index'
 import { Route as AuthenticatedWorkspaceSlugDashboardGettingStartedImport } from './routes/_authenticated/$workspaceSlug/_dashboard/getting-started'
+import { Route as authAuthCliCompleteImport } from './routes/(auth)/auth.cli.complete'
 import { Route as AuthenticatedWorkspaceSlugDashboardProjectsIndexImport } from './routes/_authenticated/$workspaceSlug/_dashboard/projects/index'
 import { Route as AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugImport } from './routes/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug'
 import { Route as AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugIndexImport } from './routes/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/index'
@@ -101,12 +103,24 @@ const AuthenticatedWorkspaceSlugDashboardIndexRoute =
     getParentRoute: () => AuthenticatedWorkspaceSlugDashboardRoute,
   } as any)
 
+const authAuthCliIndexRoute = authAuthCliIndexImport.update({
+  id: '/(auth)/auth/cli/',
+  path: '/auth/cli/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const AuthenticatedWorkspaceSlugDashboardGettingStartedRoute =
   AuthenticatedWorkspaceSlugDashboardGettingStartedImport.update({
     id: '/getting-started',
     path: '/getting-started',
     getParentRoute: () => AuthenticatedWorkspaceSlugDashboardRoute,
   } as any)
+
+const authAuthCliCompleteRoute = authAuthCliCompleteImport.update({
+  id: '/(auth)/auth/cli/complete',
+  path: '/auth/cli/complete',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthenticatedWorkspaceSlugDashboardProjectsIndexRoute =
   AuthenticatedWorkspaceSlugDashboardProjectsIndexImport.update({
@@ -223,12 +237,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceSlugWelcomeImport
       parentRoute: typeof AuthenticatedWorkspaceSlugImport
     }
+    '/(auth)/auth/cli/complete': {
+      id: '/(auth)/auth/cli/complete'
+      path: '/auth/cli/complete'
+      fullPath: '/auth/cli/complete'
+      preLoaderRoute: typeof authAuthCliCompleteImport
+      parentRoute: typeof rootRoute
+    }
     '/_authenticated/$workspaceSlug/_dashboard/getting-started': {
       id: '/_authenticated/$workspaceSlug/_dashboard/getting-started'
       path: '/getting-started'
       fullPath: '/$workspaceSlug/getting-started'
       preLoaderRoute: typeof AuthenticatedWorkspaceSlugDashboardGettingStartedImport
       parentRoute: typeof AuthenticatedWorkspaceSlugDashboardImport
+    }
+    '/(auth)/auth/cli/': {
+      id: '/(auth)/auth/cli/'
+      path: '/auth/cli'
+      fullPath: '/auth/cli'
+      preLoaderRoute: typeof authAuthCliIndexImport
+      parentRoute: typeof rootRoute
     }
     '/_authenticated/$workspaceSlug/_dashboard/': {
       id: '/_authenticated/$workspaceSlug/_dashboard/'
@@ -371,7 +399,9 @@ export interface FileRoutesByFullPath {
   '/signup': typeof authSignupRoute
   '/$workspaceSlug': typeof AuthenticatedWorkspaceSlugDashboardRouteWithChildren
   '/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
+  '/auth/cli/complete': typeof authAuthCliCompleteRoute
   '/$workspaceSlug/getting-started': typeof AuthenticatedWorkspaceSlugDashboardGettingStartedRoute
+  '/auth/cli': typeof authAuthCliIndexRoute
   '/$workspaceSlug/': typeof AuthenticatedWorkspaceSlugDashboardIndexRoute
   '/$workspaceSlug/projects/$projectSlug': typeof AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugRouteWithChildren
   '/$workspaceSlug/projects': typeof AuthenticatedWorkspaceSlugDashboardProjectsIndexRoute
@@ -390,7 +420,9 @@ export interface FileRoutesByTo {
   '/signup': typeof authSignupRoute
   '/$workspaceSlug': typeof AuthenticatedWorkspaceSlugDashboardIndexRoute
   '/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
+  '/auth/cli/complete': typeof authAuthCliCompleteRoute
   '/$workspaceSlug/getting-started': typeof AuthenticatedWorkspaceSlugDashboardGettingStartedRoute
+  '/auth/cli': typeof authAuthCliIndexRoute
   '/$workspaceSlug/projects': typeof AuthenticatedWorkspaceSlugDashboardProjectsIndexRoute
   '/$workspaceSlug/projects/$projectSlug/activities': typeof AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugActivitiesRoute
   '/$workspaceSlug/projects/$projectSlug/compare': typeof AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugCompareRoute
@@ -409,7 +441,9 @@ export interface FileRoutesById {
   '/_authenticated/$workspaceSlug': typeof AuthenticatedWorkspaceSlugRouteWithChildren
   '/_authenticated/$workspaceSlug/_dashboard': typeof AuthenticatedWorkspaceSlugDashboardRouteWithChildren
   '/_authenticated/$workspaceSlug/welcome': typeof AuthenticatedWorkspaceSlugWelcomeRoute
+  '/(auth)/auth/cli/complete': typeof authAuthCliCompleteRoute
   '/_authenticated/$workspaceSlug/_dashboard/getting-started': typeof AuthenticatedWorkspaceSlugDashboardGettingStartedRoute
+  '/(auth)/auth/cli/': typeof authAuthCliIndexRoute
   '/_authenticated/$workspaceSlug/_dashboard/': typeof AuthenticatedWorkspaceSlugDashboardIndexRoute
   '/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug': typeof AuthenticatedWorkspaceSlugDashboardProjectsProjectSlugRouteWithChildren
   '/_authenticated/$workspaceSlug/_dashboard/projects/': typeof AuthenticatedWorkspaceSlugDashboardProjectsIndexRoute
@@ -430,7 +464,9 @@ export interface FileRouteTypes {
     | '/signup'
     | '/$workspaceSlug'
     | '/$workspaceSlug/welcome'
+    | '/auth/cli/complete'
     | '/$workspaceSlug/getting-started'
+    | '/auth/cli'
     | '/$workspaceSlug/'
     | '/$workspaceSlug/projects/$projectSlug'
     | '/$workspaceSlug/projects'
@@ -448,7 +484,9 @@ export interface FileRouteTypes {
     | '/signup'
     | '/$workspaceSlug'
     | '/$workspaceSlug/welcome'
+    | '/auth/cli/complete'
     | '/$workspaceSlug/getting-started'
+    | '/auth/cli'
     | '/$workspaceSlug/projects'
     | '/$workspaceSlug/projects/$projectSlug/activities'
     | '/$workspaceSlug/projects/$projectSlug/compare'
@@ -465,7 +503,9 @@ export interface FileRouteTypes {
     | '/_authenticated/$workspaceSlug'
     | '/_authenticated/$workspaceSlug/_dashboard'
     | '/_authenticated/$workspaceSlug/welcome'
+    | '/(auth)/auth/cli/complete'
     | '/_authenticated/$workspaceSlug/_dashboard/getting-started'
+    | '/(auth)/auth/cli/'
     | '/_authenticated/$workspaceSlug/_dashboard/'
     | '/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug'
     | '/_authenticated/$workspaceSlug/_dashboard/projects/'
@@ -483,6 +523,8 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   authLoginRoute: typeof authLoginRoute
   authSignupRoute: typeof authSignupRoute
+  authAuthCliCompleteRoute: typeof authAuthCliCompleteRoute
+  authAuthCliIndexRoute: typeof authAuthCliIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -492,6 +534,8 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   authLoginRoute: authLoginRoute,
   authSignupRoute: authSignupRoute,
+  authAuthCliCompleteRoute: authAuthCliCompleteRoute,
+  authAuthCliIndexRoute: authAuthCliIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -509,7 +553,9 @@ export const routeTree = rootRoute
         "/auth",
         "/onboarding",
         "/(auth)/login",
-        "/(auth)/signup"
+        "/(auth)/signup",
+        "/(auth)/auth/cli/complete",
+        "/(auth)/auth/cli/"
       ]
     },
     "/": {
@@ -555,9 +601,15 @@ export const routeTree = rootRoute
       "filePath": "_authenticated/$workspaceSlug/welcome.tsx",
       "parent": "/_authenticated/$workspaceSlug"
     },
+    "/(auth)/auth/cli/complete": {
+      "filePath": "(auth)/auth.cli.complete.tsx"
+    },
     "/_authenticated/$workspaceSlug/_dashboard/getting-started": {
       "filePath": "_authenticated/$workspaceSlug/_dashboard/getting-started.tsx",
       "parent": "/_authenticated/$workspaceSlug/_dashboard"
+    },
+    "/(auth)/auth/cli/": {
+      "filePath": "(auth)/auth.cli.index.tsx"
     },
     "/_authenticated/$workspaceSlug/_dashboard/": {
       "filePath": "_authenticated/$workspaceSlug/_dashboard/index.tsx",

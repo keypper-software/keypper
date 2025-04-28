@@ -1,37 +1,54 @@
 import {
-  createCipheriv,
-  createDecipheriv,
   randomBytes,
   scryptSync,
+  createCipheriv,
+  createDecipheriv,
 } from "crypto";
 
-/**
- * Encrypts a text string using AES-256-CTR encryption
- * @param text The text to encrypt
- * @param secretKey The secret key used for encryption
- * @returns The encrypted text in the format "iv:encryptedText"
- */
+type EncryptedPayload = {
+  salt: string;
+  iv: string;
+  authTag: string;
+  ciphertext: string;
+};
+
 export function encrypt(text: string, secretKey: string): string {
-  const iv = randomBytes(16);
-  const key = scryptSync(secretKey, "salt", 32);
-  const cipher = createCipheriv("aes-256-ctr", key, iv);
-  const encryptedText = Buffer.concat([cipher.update(text), cipher.final()]);
-  return `${iv.toString("hex")}:${encryptedText.toString("hex")}`;
+  const salt = randomBytes(16);
+  const key = scryptSync(secretKey, salt, 32);
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+
+  const encrypted = Buffer.concat([
+    cipher.update(text, "utf8"),
+    cipher.final(),
+  ]);
+  const authTag = cipher.getAuthTag();
+
+  const payload: EncryptedPayload = {
+    salt: salt.toString("hex"),
+    iv: iv.toString("hex"),
+    authTag: authTag.toString("hex"),
+    ciphertext: encrypted.toString("hex"),
+  };
+
+  return JSON.stringify(payload);
 }
 
-/**
- * Decrypts an encrypted text string using AES-256-CTR decryption
- * @param text The encrypted text in the format "iv:encryptedText"
- * @param secretKey The secret key used for decryption
- * @returns The decrypted text
- */
-export function decrypt(text: string, secretKey: string): string {
-  const [iv, encryptedText] = text.split(":");
-  const key = scryptSync(secretKey, "salt", 32);
-  const decipher = createDecipheriv("aes-256-ctr", key, Buffer.from(iv, "hex"));
-  const decryptedText = Buffer.concat([
-    decipher.update(Buffer.from(encryptedText, "hex")),
+export function decrypt(payloadString: string, secretKey: string): string {
+  const payload: EncryptedPayload = JSON.parse(payloadString);
+
+  const salt = Buffer.from(payload.salt, "hex");
+  const iv = Buffer.from(payload.iv, "hex");
+  const authTag = Buffer.from(payload.authTag, "hex");
+  const ciphertext = Buffer.from(payload.ciphertext, "hex");
+
+  const key = scryptSync(secretKey, salt, 32);
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(authTag);
+
+  const decrypted = Buffer.concat([
+    decipher.update(ciphertext),
     decipher.final(),
   ]);
-  return decryptedText.toString();
+  return decrypted.toString("utf8");
 }
