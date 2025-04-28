@@ -20,6 +20,9 @@ importers:
 
   apps/cli:
     dependencies:
+      axios:
+        specifier: ^1.7.9
+        version: 1.9.0
       cli-spinners:
         specifier: ^3.2.0
         version: 3.2.0
