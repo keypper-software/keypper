@@ -1,9 +1,13 @@
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import axios from "axios";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/interface/button";
 import Card from "~/components/interface/card";
 import { Input } from "~/components/interface/input";
 import { APP_NAME } from "~/lib/constants";
+
 export const Route = createFileRoute("/(auth)/auth/cli/")({
   component: RouteComponent,
   head: () => ({
@@ -19,19 +23,62 @@ function RouteComponent() {
   const [authPhrase, setAuthPhrase] = useState("");
   const [tokenName, setTokenName] = useState("");
   const [isAuthPhraseValid, setIsAuthPhraseValid] = useState(false);
-  const [userName, setUserName] = useState("Akinkunmi");
+
+  const {
+    mutate: verifyAuthPhraseMutation,
+    isPending: isVerifyAuthPhrasePending,
+    data: authPhraseData,
+  } = useMutation({
+    mutationFn: async () => {
+      const { data } = await axios.get(
+        `/api/cli/auth-phrase?auth_phrase=${authPhrase}`
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      setIsAuthPhraseValid(true);
+      setAuthPhrase("");
+      setTokenName(data.machineName);
+    },
+    onError: (error) => {
+      // @ts-ignore
+      toast.error(error.response.data.error);
+    },
+  });
 
   const verifyAuthPhrase = async () => {
-    setIsAuthPhraseValid(true);
-    setAuthPhrase("");
+    verifyAuthPhraseMutation();
   };
 
   const navigate = useNavigate();
 
-  const completeAuth = async () => {
-    setIsAuthPhraseValid(true);
-    setAuthPhrase("");
-    navigate({ to: "/auth/cli/complete" });
+  const {
+    mutate: createTokenMutation,
+    isPending: isCreateTokenPending,
+    data: createTokenData,
+  } = useMutation({
+    mutationFn: async () => {
+      const { data } = await axios.post(`/api/cli/token`, {
+        authPhraseId: authPhraseData?.id,
+        name: tokenName,
+        machineName: authPhraseData?.machineName,
+        operatingSystem: authPhraseData?.operatingSystem,
+      });
+      return data;
+    },
+    onSuccess: () => {
+      setIsAuthPhraseValid(true);
+      setAuthPhrase("");
+      navigate({ to: "/auth/cli/complete" });
+    },
+    onError: (error) => {
+      // @ts-ignore
+      toast.error(error.response.data.error);
+    },
+  });
+
+  const createToken = async () => {
+    createTokenMutation();
   };
 
   return (
@@ -60,7 +107,7 @@ function RouteComponent() {
           <p className="text-sm text-gray-500 mt-4">
             Enter a name for this token, eg.{" "}
             <span className="font-mono font-semibold">
-              {userName}'s laptop.
+              {authPhraseData?.userName}'s laptop.
             </span>{" "}
             This will help you identify it later if you need to revoke it.
           </p>
@@ -79,7 +126,8 @@ function RouteComponent() {
         <Button
           className="w-full mt-4"
           disabled={isAuthPhraseValid ? !tokenName : !authPhrase}
-          onClick={isAuthPhraseValid ? completeAuth : verifyAuthPhrase}
+          onClick={isAuthPhraseValid ? createToken : verifyAuthPhrase}
+          isLoading={isVerifyAuthPhrasePending || isCreateTokenPending}
         >
           {isAuthPhraseValid ? "Complete CLI Auth" : "Continue"}
         </Button>

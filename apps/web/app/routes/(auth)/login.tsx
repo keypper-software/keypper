@@ -17,7 +17,7 @@ export const Route = createFileRoute("/(auth)/login")({
 
 function RouteComponent() {
   return (
-    <div className="h-screen w-full max-w-2xl mx-auto bg-background flex flex-col items-start justify-center space-y-5 relative">
+    <div className="h-screen w-full max-w-2xl mx-auto bg-background flex flex-col items-start justify-center space-y-5 relative px-10">
       <Link to="/">
         <img src="/logo/icon.png" alt="Keypper" className="w-[60px]" />
       </Link>

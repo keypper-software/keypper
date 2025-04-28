@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/$workspaceSlug/welcome")({
 
 function RouteComponent() {
   const { workspaceSlug } = Route.useParams();
-  const [currentStep, setCurrentStep] = useState("3");
+  const [currentStep, setCurrentStep] = useState("0");
 
   const {
     data: projects,
