@@ -1,9 +1,10 @@
 import {
+  HeadContent,
   Outlet,
   ScrollRestoration,
   createRootRoute,
 } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/start";
+import { Meta, Scripts } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import appStyles from "~/styles/app.css?url";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -57,6 +58,7 @@ function RootComponent() {
       <Toaster richColors />
       <QueryClientProvider client={queryClient}>
         <Outlet />
+        <HeadContent />
         {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </RootDocument>
@@ -67,11 +69,11 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html>
       <head>
+        <link rel="shortcut icon" href="/logo/icon.png" type="image/png" />
         <Meta />
       </head>
       <body>
         {children}
-        <ScrollRestoration />
         <Scripts />
       </body>
     </html>

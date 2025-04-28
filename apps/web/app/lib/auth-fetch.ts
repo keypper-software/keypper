@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/start";
+import { createServerFn } from "@tanstack/react-start";
 import { getWebRequest } from "vinxi/http";
 import { auth } from "~/lib/auth";
 import { db } from "~/db";
