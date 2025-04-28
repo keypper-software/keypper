@@ -1,5 +1,4 @@
 import { EllipsisVertical } from "lucide-react";
-import { useState, useEffect } from "react";
 import { Button } from "~/components/interface/button";
 import { Input } from "~/components/interface/input";
 import { SecretInput } from "~/components/interface/secret-input";
@@ -13,19 +12,16 @@ import api from "~/lib/api";
 import { toast } from "sonner";
 import { useParams } from "@tanstack/react-router";
 import useEnvironmentStore from "~/stores/environment";
-import useSecretsStore from "~/stores/secrets";
-import { cn } from "~/lib/utils";
+import useSecretsStore, { RevealedSecret } from "~/stores/secrets";
 import { useSecrets } from "~/hooks/useSecrets";
+import { useState } from "react";
+import { cn } from "~/lib/utils";
 import { useUnsavedChangesStore } from "~/stores/unsaved-changes";
 import { countUnsavedChanges } from "~/utils/count-unsaved-changes";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface SecretProps {
-  secret: {
-    id: string;
-    key: string;
-    value: string;
-  };
+  secret: RevealedSecret;
 }
 
 const Secret = ({ secret }: SecretProps) => {
@@ -33,8 +29,9 @@ const Secret = ({ secret }: SecretProps) => {
     from: "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/",
   });
 
-  const { environment } = useEnvironmentStore();
+  const [loading, setLoading] = useState(false);
   const [hideValue, setHideValue] = useState(true);
+  const { secrets, getOriginalValue, rawSecrets } = useSecrets(
   const [secretValue, setSecretValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -46,77 +43,52 @@ const Secret = ({ secret }: SecretProps) => {
     workspaceSlug,
     projectSlug
   );
+  const { setSecrets } = useSecretsStore();
 
-  const thisSecret = secrets.find((s) => s?.id === secret.id);
-
-  const fetchSecretValue = async () => {
-    if (!!secretValue) {
-      setHideValue(false);
-      return;
-    }
-
+  const fetchSecret = async () => {
+    setHideValue(false);
+    setLoading(true);
     try {
-      setIsLoading(true);
-      const response = await api.get(
-        `/api/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${secret.key}&environment=${environment}`
-      );
-      const revealedValue = response.data.value;
-      setSecretValue(revealedValue);
-      setHideValue(false);
-
-      // When revealing, update with the original value from the API
-      setSecrets(
-        secrets.map((s) => {
-          if (s?.id === secret.id) {
-            return { ...s, value: revealedValue, originalValue: revealedValue };
-          }
-          return s;
-        })
-      );
-
-      // Update revealed secrets with the original value
-      const updatedRevealedSecret = {
-        ...secret,
-        value: revealedValue,
-        originalValue: revealedValue,
-      };
-
-      setRevealedSecrets(
-        revealedSecrets.find((s) => s?.id === secret.id)
-          ? revealedSecrets.map((s) =>
-              s.id === secret.id ? updatedRevealedSecret : s
-            )
-          : [...revealedSecrets, updatedRevealedSecret]
-      );
+      await getOriginalValue(secret.key, secret.id);
     } catch (error) {
-      console.error("Error fetching secret value:", error);
-      toast.error("Failed to reveal secret value");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const updateSecretValue = (newValue: string) => {
-    // Update the secrets store
-    setSecrets(
-      secrets.map((s) => {
-        if (s?.id === secret.id) {
-          return { ...s, value: newValue };
+  const updateSecret = (type: "key" | "value", value: string) => {
+    let updated;
+    if (type === "key") {
+      updated = rawSecrets.map((s) => {
+        if (secret.id == s.id) {
+          return {
+            ...s,
+            newKey: value,
+          };
         }
         return s;
-      })
-    );
-
-    // Update the localSecrets state
-    setLocalSecrets(
-      localSecrets.map((s) => {
-        if (s?.id === secret.id) {
-          return { ...s, value: newValue };
+      });
+    } else {
+      updated = rawSecrets.map((s) => {
+        if (secret.id == s.id) {
+          return {
+            ...s,
+            newValue: value,
+          };
         }
         return s;
-      })
-    );
+      });
+    }
+    setSecrets(updated);
   };
+
+
+  const isKeyChanged = !secret.newKey ? false : secret.newKey !== secret.key;
+  const isValueChanged =
+    !secret.originalValue || !secret.newValue
+      ? false
+      : secret.newValue !== secret.originalValue;
+  return (
 
   const { setUnsavedChanges } = useUnsavedChangesStore();
 
@@ -155,6 +127,7 @@ const Secret = ({ secret }: SecretProps) => {
   };
 
   return isDeleted ? null : (
+
     <div
       key={secret.id}
       data-secret-id={secret.id}
@@ -162,6 +135,10 @@ const Secret = ({ secret }: SecretProps) => {
     >
       <div className="w-[30%]">
         <Input
+
+          defaultValue={isKeyChanged ? secret.newKey : secret.key}
+          onChange={(e) => updateSecret("key", e.target.value)}
+
           defaultValue={secret.key}
           onChange={(e) => {
             setSecrets(
@@ -182,6 +159,7 @@ const Secret = ({ secret }: SecretProps) => {
               })
             );
           }}
+
           className={cn(
             isKeyChanged && "border-yellow-500 focus:border-yellow-500"
           )}
@@ -190,17 +168,17 @@ const Secret = ({ secret }: SecretProps) => {
       <div className="w-[70%] flex items-center">
         <SecretInput
           hideValue={hideValue}
-          onClick={fetchSecretValue}
-          value={secretValue}
+          onClick={fetchSecret}
+          value={isValueChanged ? secret.newValue : secret.originalValue}
           id={secret.id}
           key={secret.key}
-          disabled={isLoading}
+          // disabled={loading}
           onHideValue={() => {
-            setHideValue(!hideValue);
+            setHideValue(true);
           }}
-          onChange={(e) => {
-            updateSecretValue(e.target.value);
-          }}
+
+          onChange={(e) => updateSecret("value", e.target.value)}
+
           isChanged={isValueChanged}
         />
         <DropdownMenu>

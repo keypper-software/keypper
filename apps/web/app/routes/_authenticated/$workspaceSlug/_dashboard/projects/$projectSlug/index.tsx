@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -12,9 +11,9 @@ import { useSecrets } from "~/hooks/useSecrets";
 import AddSecretsDialog from "~/components/workspace/projects/modals/add-secrets";
 import SecretsList from "~/components/workspace/projects/secrets-list";
 import useEnvironmentStore from "~/stores/environment";
+import { useEffect } from "react";
+import useEnvironments from "~/hooks/useEnvironments";
 import { Button } from "~/components/interface/button";
-import useSecretsStore from "~/stores/secrets";
-import { useUnsavedChangesStore } from "~/stores/unsaved-changes";
 
 export const Route = createFileRoute(
   "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/"
@@ -26,18 +25,29 @@ function RouteComponent() {
   const { workspaceSlug, projectSlug } = Route.useParams();
 
   const {
-    selectedEnvironment,
-    setSelectedEnvironment,
-    environmentsData,
-    environmentsLoading,
-    secretsData,
-    secretsLoading,
-    localSecrets,
-    setLocalSecrets,
-  } = useSecrets(workspaceSlug, projectSlug);
+    environments,
+    loading: environmentsLoading,
+    initialEnv,
+  } = useEnvironments({
+    projectSlug,
+    workspaceSlug,
+  });
+  const { secrets, secretsLoading, getChangesCount, mutate } = useSecrets(
+    workspaceSlug,
+    projectSlug
+  );
 
-  const { setEnvironment } = useEnvironmentStore();
-  const { unsavedChanges: numberOfUnsavedChanges } = useUnsavedChangesStore();
+  const { environment, setEnvironment } = useEnvironmentStore(); // use this to only get env if sure it has been loaded
+  // set first env
+  useEffect(() => {
+    setEnvironment(initialEnv);
+  }, [initialEnv]);
+
+  useEffect(() => {
+    environment && mutate();
+  }, [environment]);
+
+  const noOfChanges = getChangesCount();
 
   if (environmentsLoading) {
     return (
@@ -53,44 +63,43 @@ function RouteComponent() {
         <div className="flex items-center gap-x-6">
           <Select
             onValueChange={(value) => {
-              setLocalSecrets([]);
               setEnvironment(value);
-              setSelectedEnvironment(value);
             }}
-            value={selectedEnvironment}
+            value={environment}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue defaultValue={selectedEnvironment} />
+              <SelectValue defaultValue={environment} />
             </SelectTrigger>
             <SelectContent>
-              {environmentsData?.environments?.map((environment) => (
+              {environments?.environments?.map((environment) => (
                 <SelectItem value={environment.name}>
                   {environment.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {secretsData?.count > 0 && (
-            <p className="text-sm">{secretsData?.count} secrets</p>
+          {secrets?.length > 0 && (
+            <p className="text-sm">{secrets?.length} secrets</p>
           )}
         </div>
 
         <div className="flex items-center gap-x-2">
-          {numberOfUnsavedChanges > 0 && (
+          {noOfChanges > 0 && (
             <span className="text-sm text-yellow-500">
-              {numberOfUnsavedChanges} unsaved changes
+              {noOfChanges} unsaved changes
             </span>
           )}
-          <Button disabled={numberOfUnsavedChanges === 0}>Save</Button>
+
+          <Button disabled={!noOfChanges}>Save Changes</Button>
           <AddSecretsDialog
             workspaceSlug={workspaceSlug}
             projectSlug={projectSlug}
-            selectedEnvironment={selectedEnvironment}
+            selectedEnvironment={environment}
           />
         </div>
       </div>
 
-      <SecretsList secrets={localSecrets} isLoading={secretsLoading} />
+      <SecretsList secrets={secrets} isLoading={secretsLoading} />
     </div>
   );
 }

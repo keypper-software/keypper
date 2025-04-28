@@ -1,9 +1,9 @@
 import { Loader2 } from "lucide-react";
 import Secret from "~/components/workspace/projects/secret";
-import { Secret as SecretType } from "~/hooks/useSecrets";
+import { RevealedSecret } from "~/stores/secrets";
 
 interface SecretsListProps {
-  secrets: SecretType[];
+  secrets: RevealedSecret[];
   isLoading: boolean;
 }
 
@@ -19,7 +19,9 @@ export default function SecretsList({ secrets, isLoading }: SecretsListProps) {
   return (
     <div className="flex flex-col gap-7 secrets-list">
       {secrets.map((secret) => (
-        <Secret key={secret.id} secret={secret} />
+        <div className="">
+          <Secret key={secret.id} secret={secret} />
+        </div>
       ))}
     </div>
   );

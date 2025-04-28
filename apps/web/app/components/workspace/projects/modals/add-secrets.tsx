@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { Button } from "~/components/interface/button";
 import { Input } from "~/components/interface/input";
 import {
@@ -15,8 +15,10 @@ import {
 import api from "~/lib/api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSecrets } from "~/hooks/useSecrets";
 
 interface Secret {
+  index: number;
   key: string;
   value: string;
 }
@@ -27,12 +29,17 @@ interface AddSecretsDialogProps {
   selectedEnvironment: string;
 }
 
+const initialSecret = [{ key: "", value: "", index: 0 }];
 export default function AddSecretsDialog({
   workspaceSlug,
   projectSlug,
   selectedEnvironment,
 }: AddSecretsDialogProps) {
-  const [newSecrets, setNewSecrets] = useState<Secret[]>([]);
+  const { secretsLoading, mutateAsync } = useSecrets(
+    workspaceSlug,
+    projectSlug
+  );
+  const [newSecrets, setNewSecrets] = useState<Secret[]>(initialSecret);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -43,19 +50,30 @@ export default function AddSecretsDialog({
     const parsedSecrets = lines
       .map((line) => {
         const [key, ...valueParts] = line.split("=").map((part) => part.trim());
-        const value = valueParts.join("=").trim();
-        return { key, value };
+        const rawValue = valueParts.join("=").trim();
+        const value = rawValue.replace(/^(['"])(.*)\1$/, "$2");
+        if (!key.startsWith("#")) {
+          return { key, value };
+        }
       })
-      .filter((secret) => secret.key && secret.value);
+      .filter((v) => Boolean(v?.key));
 
+    for (const allNewSecrets of parsedSecrets) {
+      handleAddNew(allNewSecrets?.key, allNewSecrets?.value);
+    }
     if (parsedSecrets.length > 0) {
-      setNewSecrets(parsedSecrets);
       toast.success(`Parsed ${parsedSecrets.length} secrets from clipboard`);
     }
   };
 
   const handleKeyPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const pastedContent = e.clipboardData.getData("text");
+    if (!pastedContent) return;
+    const isValidEnvContent = pastedContent.split("\n").some((line) => {
+      return line.split("=").length > 1 && !line.startsWith("#");
+    });
+    if (!isValidEnvContent) return;
     parseEnvContent(pastedContent);
   };
 
@@ -64,47 +82,52 @@ export default function AddSecretsDialog({
     field: keyof Secret,
     value: string
   ) => {
-    const updatedSecrets = [...newSecrets];
-    updatedSecrets[index] = { ...updatedSecrets[index], [field]: value };
+    const updatedSecrets = newSecrets.map((secret) => {
+      if (secret.index === index) {
+        return {
+          ...secret,
+          [field]: value,
+        };
+      }
+
+      return secret;
+    });
+
     setNewSecrets(updatedSecrets);
   };
 
-  const handleAddNew = () => {
-    if (newSecrets.length === 0) {
-      const firstKey = document.querySelector(
-        'input[placeholder="KEY"]'
-      ) as HTMLInputElement;
-      const firstValue = document.querySelector(
-        'input[placeholder="VALUE"]'
-      ) as HTMLInputElement;
-      if (firstKey?.value || firstValue?.value) {
-        setNewSecrets([
-          { key: firstKey?.value || "", value: firstValue?.value || "" },
-          { key: "", value: "" },
-        ]);
-        return;
-      }
-    }
-    setNewSecrets([...newSecrets, { key: "", value: "" }]);
+  const handleAddNew = (key?: string, value?: string) => {
+    setNewSecrets((oldSecrets) => [
+      ...oldSecrets,
+      {
+        index: oldSecrets.length + 1,
+        key: key || "",
+        value: value || "",
+      },
+    ]);
   };
 
-  const handleFirstKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (newSecrets.length === 0) {
-      setNewSecrets([{ key: value, value: "" }]);
-    } else {
-      handleSecretChange(0, "key", value);
-    }
+  const resetState = () => {
+    setNewSecrets(initialSecret);
   };
 
-  const handleFirstValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (newSecrets.length === 0) {
-      setNewSecrets([{ key: "", value }]);
-    } else {
-      handleSecretChange(0, "value", value);
-    }
-  };
+  // const handleFirstKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   if (newSecrets.length === 0) {
+  //     setNewSecrets([{ key: value, value: "" }]);
+  //   } else {
+  //     handleSecretChange(0, "key", value);
+  //   }
+  // };
+
+  // const handleFirstValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   if (newSecrets.length === 0) {
+  //     setNewSecrets([{ key: "", value }]);
+  //   } else {
+  //     handleSecretChange(0, "value", value);
+  //   }
+  // };
 
   const handleAddSecrets = async () => {
     if (newSecrets.length === 0) return;
@@ -130,7 +153,8 @@ export default function AddSecretsDialog({
         queryKey: ["secrets", workspaceSlug, projectSlug, selectedEnvironment],
       });
 
-      setNewSecrets([]);
+      await mutateAsync();
+      resetState();
       toast.success(`Added ${validSecrets.length} secrets successfully`);
 
       // Close the dialog
@@ -144,11 +168,25 @@ export default function AddSecretsDialog({
   };
 
   const handleRemoveSecret = (index: number) => {
-    setNewSecrets(newSecrets.filter((_, i) => i !== index));
+    // omoo: this func remove and rearrange the index back in order
+    const filteredSecrets = newSecrets
+      .filter((secret) => secret.index != index)
+      .map((secret, newIndex) => ({
+        ...secret,
+        index: newIndex,
+      }));
+
+    setNewSecrets(filteredSecrets);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(state) => {
+        setIsOpen(state);
+        // !state && resetState();
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline">
           <Plus size={16} />
@@ -164,10 +202,12 @@ export default function AddSecretsDialog({
         <div className="flex flex-col gap-y-4">
           <div className="space-y-2">
             <div className="max-h-[300px] overflow-y-auto space-y-2">
-              {newSecrets.length > 0 ? (
-                newSecrets.map((secret, index) => (
+              {newSecrets.map((secret) => {
+                const index = secret.index;
+                return (
                   <div key={index} className="flex items-center gap-x-2">
                     <Input
+                      onPaste={handleKeyPaste}
                       value={secret.key}
                       onChange={(e) =>
                         handleSecretChange(index, "key", e.target.value)
@@ -176,43 +216,49 @@ export default function AddSecretsDialog({
                     />
                     <Input
                       value={secret.value}
+                      onPaste={handleKeyPaste}
                       onChange={(e) =>
                         handleSecretChange(index, "value", e.target.value)
                       }
                       placeholder="VALUE"
                     />
+                    {newSecrets.length > 1 && (
+                      <button onClick={() => handleRemoveSecret(secret.index)}>
+                        <Trash color="red" size={18} />
+                      </button>
+                    )}
                   </div>
-                ))
-              ) : (
-                <div className="flex items-center gap-x-2">
-                  <Input
-                    placeholder="KEY"
-                    onPaste={handleKeyPaste}
-                    onChange={handleFirstKeyChange}
-                  />
-                  <Input
-                    placeholder="VALUE"
-                    onChange={handleFirstValueChange}
-                  />
-                </div>
-              )}
+                );
+              })}
             </div>
 
-            <Button
-              variant="outline"
-              className="mt-2 text-sm py-1"
-              onClick={handleAddNew}
-            >
-              <Plus size={14} className="mr-2" />
-              Add another secret
-            </Button>
+            <div className="flex gap-3 items-center">
+              <Button
+                variant="outline"
+                className="mt-2 text-sm py-1"
+                onClick={() => handleAddNew()}
+              >
+                <Plus size={14} className="mr-2" />
+                Add another secret
+              </Button>
+              {newSecrets.length > 1 && (
+                <Button
+                  variant="destructive"
+                  className="mt-2 text-sm py-1"
+                  onClick={() => resetState()}
+                >
+                  <Plus size={14} className="mr-2" />
+                  Clear All
+                </Button>
+              )}
+            </div>
           </div>
         </div>
         <DialogFooter className="sm:justify-start mt-6 flex items-center gap-x-3">
           <Button
             onClick={handleAddSecrets}
             disabled={newSecrets.length === 0 || isSubmitting}
-            isLoading={isSubmitting}
+            isLoading={isSubmitting || secretsLoading}
           >
             {isSubmitting
               ? "Adding Secrets..."
