@@ -4,7 +4,6 @@ import { auth } from "~/lib/auth";
 export const Route = createFileRoute("/_authenticated")({
   component: RouteComponent,
   beforeLoad: ({ context }) => {
-    console.log("context", context);
     if (!context.userId) {
       return redirect({ to: "/login" });
     }
