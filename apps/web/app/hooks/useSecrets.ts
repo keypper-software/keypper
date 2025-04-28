@@ -19,6 +19,10 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   const { environment } = useEnvironmentStore();
   const { secrets, setSecrets } = useSecretsStore();
 
+  const filteredSecrets = secrets.filter(
+    (secret) => secret.env === environment
+  );
+
   const {
     isPending: secretsLoading,
     mutate,
@@ -31,7 +35,24 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
       const response = await api.get(
         `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`
       );
-      setSecrets(response.data.secrets);
+
+      const data = response.data.secrets as Secret[];
+      const previousSecrets = secrets;
+      const secretMaps = new Map();
+
+      previousSecrets.forEach((secret) => {
+        secretMaps.set(secret.id, secret);
+      });
+
+      data.forEach((secret) => {
+        if (!secretMaps.has(secret.id)) {
+          secretMaps.set(secret.id, { ...secret, env: environment });
+        }
+      });
+
+      const updatedSecrets = Array.from(secretMaps.values());
+      setSecrets(updatedSecrets);
+
       return response.data;
     },
     onError() {
@@ -59,7 +80,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   });
 
   const getChangesCount = () => {
-    return secrets.reduce((count, secret) => {
+    return filteredSecrets.reduce((count, secret) => {
       let changeCount = 0;
 
       if (secret.newKey !== undefined && secret.newKey !== secret.key) {
@@ -76,14 +97,14 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
       return count + changeCount;
     }, 0);
   };
-  const getOriginalValue = async (key: string) => {
+  const getOriginalValue = async (key: string, id:string) => {
     try {
       const response = await api.get(
         `/api/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
       );
       const revealedValue = response.data.value;
       const newSecret = secrets.map((secret) => {
-        if (secret.key == key) {
+        if (secret.key == key && secret.id == id && secret.env == environment) {
           return {
             ...secret,
             originalValue: revealedValue,
@@ -100,7 +121,8 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   };
 
   return {
-    secrets,
+    secrets: filteredSecrets,
+    rawSecrets: secrets,
     secretsLoading,
     mutate,
     mutateAsync,

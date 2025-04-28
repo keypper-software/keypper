@@ -28,14 +28,17 @@ const Secret = ({ secret }: SecretProps) => {
 
   const [loading, setLoading] = useState(false);
   const [hideValue, setHideValue] = useState(true);
-  const { secrets, getOriginalValue } = useSecrets(workspaceSlug, projectSlug);
+  const { secrets, getOriginalValue, rawSecrets } = useSecrets(
+    workspaceSlug,
+    projectSlug
+  );
   const { setSecrets } = useSecretsStore();
 
   const fetchSecret = async () => {
     setHideValue(false);
     setLoading(true);
     try {
-      await getOriginalValue(secret.key);
+      await getOriginalValue(secret.key, secret.id);
     } catch (error) {
     } finally {
       setLoading(false);
@@ -45,7 +48,7 @@ const Secret = ({ secret }: SecretProps) => {
   const updateSecret = (type: "key" | "value", value: string) => {
     let updated;
     if (type === "key") {
-      updated = secrets.map((s) => {
+      updated = rawSecrets.map((s) => {
         if (secret.id == s.id) {
           return {
             ...s,
@@ -55,7 +58,7 @@ const Secret = ({ secret }: SecretProps) => {
         return s;
       });
     } else {
-      updated = secrets.map((s) => {
+      updated = rawSecrets.map((s) => {
         if (secret.id == s.id) {
           return {
             ...s,
