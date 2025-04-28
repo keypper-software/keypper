@@ -9,6 +9,8 @@ import {
 import { Button } from "./button";
 import { RiEyeOffFill } from "react-icons/ri";
 import { cn } from "~/lib/utils";
+import { CgUndo } from "react-icons/cg";
+
 export interface SecretInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   id: string;
@@ -17,6 +19,7 @@ export interface SecretInputProps
   value?: string;
   onHideValue?: () => void;
   isChanged?: boolean;
+  showUndoButton?: boolean;
 }
 
 export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
@@ -30,6 +33,7 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
       id,
       key,
       isChanged,
+      showUndoButton = true,
       ...props
     },
     ref
@@ -75,17 +79,23 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
                       setSecretValue(e.target.value);
                       props.onChange?.(e);
                     }}
+                    // disabled={showUndoButton}
                     className={cn(
                       isChanged && "border-yellow-500 focus:border-yellow-500",
                       className
                     )}
                   />
-                  <button
-                    className="absolute right-[6rem] text-gray-500"
-                    onClick={onHideValue}
-                  >
-                    <RiEyeOffFill />
-                  </button>
+                  <div className="flex absolute right-[6rem] text-gray-500 items-center gap-x-3">
+                    <button onClick={onHideValue}>
+                      <RiEyeOffFill />
+                    </button>
+
+                    {showUndoButton && (
+                      <button>
+                        <CgUndo size={20} />
+                      </button>
+                    )}
+                  </div>
                 </>
               )}
             </TooltipTrigger>
