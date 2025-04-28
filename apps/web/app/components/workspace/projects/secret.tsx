@@ -9,14 +9,12 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import api from "~/lib/api";
-import { toast } from "sonner";
 import { useParams } from "@tanstack/react-router";
-import useEnvironmentStore from "~/stores/environment";
 import useSecretsStore, { RevealedSecret } from "~/stores/secrets";
 import { useSecrets } from "~/hooks/useSecrets";
 import { useState } from "react";
 import { cn } from "~/lib/utils";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 interface SecretProps {
   secret: RevealedSecret;
