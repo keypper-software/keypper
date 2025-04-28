@@ -1,5 +1,5 @@
-import { json } from "@tanstack/start";
-import { createAPIFileRoute } from "@tanstack/start/api";
+import { json } from "@tanstack/react-start";
+import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { db } from "~/db";
 import { auth } from "~/lib/auth";
 import { auditLog, secret } from "~/db/schema";
