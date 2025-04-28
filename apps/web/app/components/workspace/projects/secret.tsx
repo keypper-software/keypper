@@ -83,7 +83,7 @@ const Secret = ({ secret }: SecretProps) => {
     >
       <div className="w-[30%]">
         <Input
-          defaultValue={secret.key}
+          defaultValue={isKeyChanged ? secret.newKey : secret.key}
           onChange={(e) => updateSecret("key", e.target.value)}
           className={cn(
             isKeyChanged && "border-yellow-500 focus:border-yellow-500"
@@ -94,7 +94,7 @@ const Secret = ({ secret }: SecretProps) => {
         <SecretInput
           hideValue={hideValue}
           onClick={fetchSecret}
-          value={secret.originalValue}
+          value={isValueChanged ? secret.newValue : secret.originalValue}
           id={secret.id}
           key={secret.key}
           // disabled={loading}
