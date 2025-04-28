@@ -7,7 +7,7 @@ import getMachineInfo from "../utils/get-machine-info";
 import { isAxiosError } from "axios";
 import storage from "../utils/storage";
 import { VERSION, AUTH_UPDATE_INTERVAL } from "../constants/index";
-
+import clipboardy from "clipboardy";
 export default async () => {
   log.text = "Initializing authentication";
   log.start();
@@ -50,6 +50,7 @@ export default async () => {
     );
 
     try {
+      await clipboardy.write(initLogin.phrase);
       await open(url, { wait: false });
       // throw new Error("Browser opening is disabled for testing purposes");
     } catch (openError) {
