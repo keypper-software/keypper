@@ -1,10 +1,9 @@
 import {
-  HeadContent,
   Outlet,
-  ScrollRestoration,
+  HeadContent,
+  Scripts,
   createRootRoute,
 } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/react-start";
 import type { ReactNode } from "react";
 import appStyles from "~/styles/app.css?url";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -70,7 +69,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     <html>
       <head>
         <link rel="shortcut icon" href="/logo/icon.png" type="image/png" />
-        <Meta />
+        <HeadContent />
       </head>
       <body>
         {children}
