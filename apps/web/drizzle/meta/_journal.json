@@ -8,6 +8,13 @@
       "when": 1745620594702,
       "tag": "0000_mute_typhoid_mary",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1745861348971,
+      "tag": "0001_safe_thunderbird",
+      "breakpoints": true
     }
   ]
 }
