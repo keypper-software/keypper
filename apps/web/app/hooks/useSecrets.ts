@@ -19,8 +19,11 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   const { environment } = useEnvironmentStore();
   const { secrets, setSecrets } = useSecretsStore();
 
-  // Fetch secrets using React Query
-  const { isPending: secretsLoading, mutate, mutateAsync } = useMutation({
+  const {
+    isPending: secretsLoading,
+    mutate,
+    mutateAsync,
+  } = useMutation({
     mutationKey: ["secrets", workspaceSlug, projectSlug, environment],
 
     mutationFn: async () => {
@@ -36,41 +39,43 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     },
   });
 
-  // Save changes to the API
-  // const handleSaveChanges = async () => {
-  //   if (!isRevealed || !hasChanges) return;
+  const parseEditedCode = () => {};
 
-  //   setSavingChanges(true);
+  const handleSaveChanges = useMutation({
+    mutationFn: async () => {
+      if (!getChangesCount()) return;
+      try {
+        const updatedSecrets = parseEditedCode();
+        await api.post(
+          `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`,
+          { secrets: updatedSecrets }
+        );
+        toast.success("Secrets updated successfully");
+      } catch (error) {
+        toast.error("Failed to save secrets");
+      } finally {
+      }
+    },
+  });
 
-  //   try {
-  //     const updatedSecrets = parseEditedCode();
+  const getChangesCount = () => {
+    return secrets.reduce((count, secret) => {
+      let changeCount = 0;
 
-  //     // Make API request to update secrets
-  //     await api.post(
-  //       `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${selectedEnvironment}`,
-  //       { secrets: updatedSecrets }
-  //     );
+      if (secret.newKey !== undefined && secret.newKey !== secret.key) {
+        changeCount++;
+      }
 
-  //     // Update local state
-  //     setLocalSecrets(updatedSecrets);
+      if (
+        secret.newValue !== undefined &&
+        secret.newValue !== secret.originalValue
+      ) {
+        changeCount++;
+      }
 
-  //     // Update original values
-  //     const newOriginalValues: Record<string, string> = {};
-  //     updatedSecrets.forEach((secret) => {
-  //       newOriginalValues[secret.key] = secret.value;
-  //     });
-  //     setOriginalSecretValues(newOriginalValues);
-
-  //     setHasChanges(false);
-  //     toast.success("Secrets updated successfully");
-  //   } catch (error) {
-  //     console.error("Error saving secrets:", error);
-  //     toast.error("Failed to save secrets");
-  //   } finally {
-  //     setSavingChanges(false);
-  //   }
-  // };
-
+      return count + changeCount;
+    }, 0);
+  };
   const getOriginalValue = async (key: string) => {
     try {
       const response = await api.get(
@@ -94,16 +99,6 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     }
   };
 
-  const getChangesCount = () => {
-    return secrets.reduce((count, change) => {
-      if (change.newKey !== undefined) count++;
-
-      if (change.newValue !== undefined) count++;
-
-      return count;
-    }, 0);
-  };
-
   return {
     secrets,
     secretsLoading,
@@ -111,5 +106,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     mutateAsync,
     getOriginalValue,
     getChangesCount,
+    updating: handleSaveChanges.isPending,
+    saveChanges: handleSaveChanges.mutateAsync,
   };
 }
