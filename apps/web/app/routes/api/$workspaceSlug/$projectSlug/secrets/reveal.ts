@@ -2,9 +2,8 @@ import { json } from "@tanstack/react-start";
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { db } from "~/db";
 import { auth } from "~/lib/auth";
-import { auditLog, secret } from "~/db/schema";
+import { auditLog } from "~/db/schema";
 import { decrypt } from "~/lib/crypto";
-import { eq, and } from "drizzle-orm";
 import dotenv from "dotenv";
 import { nanoid } from "nanoid";
 
