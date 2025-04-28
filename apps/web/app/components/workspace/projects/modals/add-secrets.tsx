@@ -222,9 +222,11 @@ export default function AddSecretsDialog({
                       }
                       placeholder="VALUE"
                     />
-                    <button onClick={() => handleRemoveSecret(secret.index)}>
-                      <Trash color="red" size={18} />
-                    </button>
+                    {newSecrets.length > 1 && (
+                      <button onClick={() => handleRemoveSecret(secret.index)}>
+                        <Trash color="red" size={18} />
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -239,14 +241,16 @@ export default function AddSecretsDialog({
                 <Plus size={14} className="mr-2" />
                 Add another secret
               </Button>
-              <Button
-                variant="destructive"
-                className="mt-2 text-sm py-1"
-                onClick={() => resetState()}
-              >
-                <Plus size={14} className="mr-2" />
-                Clear All
-              </Button>
+              {newSecrets.length > 1 && (
+                <Button
+                  variant="destructive"
+                  className="mt-2 text-sm py-1"
+                  onClick={() => resetState()}
+                >
+                  <Plus size={14} className="mr-2" />
+                  Clear All
+                </Button>
+              )}
             </div>
           </div>
         </div>
