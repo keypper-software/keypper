@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import getUrl from "./utils/get-url";
 import cli from "./cli";
-import open from "open";
 import login from "./actions/login";
 
 cli
