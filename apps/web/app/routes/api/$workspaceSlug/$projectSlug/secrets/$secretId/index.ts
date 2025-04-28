@@ -15,11 +15,6 @@ import { auth } from "~/lib/auth";
 export const APIRoute = createAPIFileRoute(
   "/api/$workspaceSlug/$projectSlug/secrets/$secretId"
 )({
-  GET: ({ request, params }) => {
-    return json({
-      message: 'Hello "/api/$workspaceSlug/$projectSlug/secrets/$secretKey"!',
-    });
-  },
   DELETE: async ({ request, params }) => {
     try {
       const session = await auth.api.getSession({
