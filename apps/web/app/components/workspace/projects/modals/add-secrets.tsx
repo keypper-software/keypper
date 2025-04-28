@@ -69,6 +69,11 @@ export default function AddSecretsDialog({
   const handleKeyPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedContent = e.clipboardData.getData("text");
+    if (!pastedContent) return;
+    const isValidEnvContent = pastedContent.split("\n").some((line) => {
+      return line.split("=").length > 1 && !line.startsWith("#");
+    });
+    if (!isValidEnvContent) return;
     parseEnvContent(pastedContent);
   };
 
@@ -225,14 +230,24 @@ export default function AddSecretsDialog({
               })}
             </div>
 
-            <Button
-              variant="outline"
-              className="mt-2 text-sm py-1"
-              onClick={() => handleAddNew()}
-            >
-              <Plus size={14} className="mr-2" />
-              Add another secret
-            </Button>
+            <div className="flex gap-3 items-center">
+              <Button
+                variant="outline"
+                className="mt-2 text-sm py-1"
+                onClick={() => handleAddNew()}
+              >
+                <Plus size={14} className="mr-2" />
+                Add another secret
+              </Button>
+              <Button
+                variant="destructive"
+                className="mt-2 text-sm py-1"
+                onClick={() => resetState()}
+              >
+                <Plus size={14} className="mr-2" />
+                Clear All
+              </Button>
+            </div>
           </div>
         </div>
         <DialogFooter className="sm:justify-start mt-6 flex items-center gap-x-3">
