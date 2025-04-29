@@ -3,6 +3,7 @@ import {
   scryptSync,
   createCipheriv,
   createDecipheriv,
+  createHash,
 } from "crypto";
 
 type EncryptedPayload = {
@@ -51,4 +52,8 @@ export function decrypt(payloadString: string, secretKey: string): string {
     decipher.final(),
   ]);
   return decrypted.toString("utf8");
+}
+
+export function hash(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
 }
