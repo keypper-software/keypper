@@ -27,11 +27,14 @@ const Secret = ({ secret }: SecretProps) => {
 
   const [loading, setLoading] = useState(false);
   const [hideValue, setHideValue] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { secrets, getOriginalValue, rawSecrets } = useSecrets(
-    workspaceSlug,
-    projectSlug
-  );
+  // const [isDeleting, setIsDeleting] = useState(false);
+  const {
+    secrets,
+    getOriginalValue,
+    rawSecrets,
+    handleDeleteSecret,
+    undoDeleteSecret,
+  } = useSecrets(workspaceSlug, projectSlug);
   const { setSecrets } = useSecretsStore();
 
   const fetchSecret = async () => {
@@ -72,38 +75,39 @@ const Secret = ({ secret }: SecretProps) => {
   };
 
   const isKeyChanged = !secret.newKey ? false : secret.newKey !== secret.key;
+  const isDeleted = secret.deleted;
   const isValueChanged =
     !secret.originalValue || !secret.newValue
       ? false
       : secret.newValue !== secret.originalValue;
 
-  const deleteSecret = async () => {
-    setIsDeleting(true);
-    try {
-      setTimeout(async () => {
-        await api.delete(
-          `/api/${workspaceSlug}/${projectSlug}/secrets/${secret.id}`
-        );
-        // Remove from local state after API call succeeds
-        setSecrets(rawSecrets.filter((s) => s.id !== secret.id));
-      }, 300); // Wait for animation to complete
-    } catch (error) {
-      console.error(error);
-      setIsDeleting(false);
-    }
-  };
+  // const deleteSecret = async () => {
+  //   setIsDeleting(true);
+  //   try {
+  //     setTimeout(async () => {
+  //       await api.delete(
+  //         `/api/${workspaceSlug}/${projectSlug}/secrets/${secret.id}`
+  //       );
+  //       // Remove from local state after API call succeeds
+  //       setSecrets(rawSecrets.filter((s) => s.id !== secret.id));
+  //     }, 300); // Wait for animation to complete
+  //   } catch (error) {
+  //     console.error(error);
+  //     setIsDeleting(false);
+  //   }
+  // };
 
   return (
     <motion.div
       key={secret.id}
       initial={{ opacity: 1, height: "auto", overflow: "hidden" }}
-      animate={{
-        opacity: isDeleting ? 0 : 1,
-        height: isDeleting ? 0 : "auto",
-        marginTop: isDeleting ? 0 : undefined,
-        marginBottom: isDeleting ? 0 : undefined,
-        padding: isDeleting ? 0 : undefined,
-      }}
+      // animate={{
+      //   opacity: isDeleting ? 0 : 1,
+      //   height: isDeleting ? 0 : "auto",
+      //   marginTop: isDeleting ? 0 : undefined,
+      //   marginBottom: isDeleting ? 0 : undefined,
+      //   padding: isDeleting ? 0 : undefined,
+      // }}
       transition={{ duration: 0.3 }}
       className="w-full flex items-center gap-4 secrets-list-item"
       style={{ overflow: "hidden" }}
@@ -112,8 +116,12 @@ const Secret = ({ secret }: SecretProps) => {
         <Input
           defaultValue={isKeyChanged ? secret.newKey : secret.key}
           onChange={(e) => updateSecret("key", e.target.value)}
+          disabled={isDeleted}
           className={cn(
-            isKeyChanged && "border-yellow-500 focus:border-yellow-500"
+            isDeleted
+              ? "border-red-500 focus:border-red-500 disabled:!opacity-100"
+              : (isValueChanged || isKeyChanged) &&
+                  "border-yellow-500 focus:border-yellow-500"
           )}
         />
       </div>
@@ -128,8 +136,10 @@ const Secret = ({ secret }: SecretProps) => {
           onHideValue={() => {
             setHideValue(true);
           }}
+          undoDelete={() => undoDeleteSecret(secret.id)}
+          isMarkedAsDeleted={isDeleted}
           onChange={(e) => updateSecret("value", e.target.value)}
-          isChanged={isValueChanged}
+          isChanged={isValueChanged || isKeyChanged}
         />
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -138,8 +148,30 @@ const Secret = ({ secret }: SecretProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={deleteSecret}>Delete</DropdownMenuItem>
+            {hideValue ? (
+              <DropdownMenuItem
+                onClick={() => {
+                  fetchSecret();
+                  setHideValue(false);
+                }}
+              >
+                Edit
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => setHideValue(true)}>
+                Hide
+              </DropdownMenuItem>
+            )}
+
+            {!isDeleted ? (
+              <DropdownMenuItem onClick={() => handleDeleteSecret(secret.id)}>
+                Delete
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={() => undoDeleteSecret(secret.id)}>
+                Undo Delete
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

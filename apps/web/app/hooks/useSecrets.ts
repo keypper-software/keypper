@@ -83,21 +83,21 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     return filteredSecrets.reduce((count, secret) => {
       let changeCount = 0;
 
-      if (secret.newKey !== undefined && secret.newKey !== secret.key) {
+      if (secret.newKey !== undefined && secret.newKey !== secret.key || secret.deleted) {
         changeCount++;
       }
 
-      if (
-        secret.newValue !== undefined &&
-        secret.newValue !== secret.originalValue
-      ) {
-        changeCount++;
-      }
+      // if (
+      //   secret.newValue !== undefined &&
+      //   secret.newValue !== secret.originalValue
+      // ) {
+      //   changeCount++;
+      // }
 
       return count + changeCount;
     }, 0);
   };
-  const getOriginalValue = async (key: string, id:string) => {
+  const getOriginalValue = async (key: string, id: string) => {
     try {
       const response = await api.get(
         `/api/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
@@ -120,6 +120,32 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     }
   };
 
+  const handleDeleteSecret = async (id: string) => {
+    const updatedSecrets = secrets.map((secret) => {
+      if (secret.id == id) {
+        return {
+          ...secret,
+          deleted: true,
+        };
+      }
+      return secret;
+    });
+    setSecrets(updatedSecrets);
+  };
+
+  const removeDeleteSecret = async (id: string) => {
+    const updatedSecrets = secrets.map((secret) => {
+      if (secret.id == id) {
+        return {
+          ...secret,
+          deleted: false,
+        };
+      }
+      return secret;
+    });
+    setSecrets(updatedSecrets);
+  };
+
   return {
     secrets: filteredSecrets,
     rawSecrets: secrets,
@@ -130,5 +156,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     getChangesCount,
     updating: handleSaveChanges.isPending,
     saveChanges: handleSaveChanges.mutateAsync,
+    handleDeleteSecret,
+    undoDeleteSecret: removeDeleteSecret,
   };
 }

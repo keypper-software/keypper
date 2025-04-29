@@ -4,10 +4,11 @@ import { Secret } from "~/hooks/useSecrets";
 export interface RevealedSecret {
   id: string;
   value: string;
-  env?:string;
+  env?: string;
   originalValue?: string;
   newValue?: string;
   newKey?: string;
+  deleted?: boolean;
   key: string;
 }
 
