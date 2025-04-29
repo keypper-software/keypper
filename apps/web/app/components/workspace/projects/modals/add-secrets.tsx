@@ -74,6 +74,15 @@ export default function AddSecretsDialog({
       return line.split("=").length > 1 && !line.startsWith("#");
     });
     if (!isValidEnvContent) return;
+    const getIndex = Number(e?.currentTarget?.dataset?.index || -1);
+    if (getIndex != -1) {
+      const containsKeyOrValue = newSecrets.find(
+        (s) =>
+          s.index == getIndex &&
+          (s.key.trim().length > 0 || s.value.trim().length > 0)
+      );
+      if (!containsKeyOrValue) handleRemoveSecret(getIndex);
+    }
     parseEnvContent(pastedContent);
   };
 
@@ -209,6 +218,7 @@ export default function AddSecretsDialog({
                     <Input
                       onPaste={handleKeyPaste}
                       value={secret.key}
+                      data-index={index}
                       onChange={(e) =>
                         handleSecretChange(index, "key", e.target.value)
                       }
@@ -216,6 +226,7 @@ export default function AddSecretsDialog({
                     />
                     <Input
                       value={secret.value}
+                      data-index={index}
                       onPaste={handleKeyPaste}
                       onChange={(e) =>
                         handleSecretChange(index, "value", e.target.value)
