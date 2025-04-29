@@ -5,10 +5,10 @@ import { nanoid } from "nanoid";
 import { db } from "~/db";
 import { authToken, authPhrase } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { encrypt } from "~/lib/crypto";
+import { encrypt, hash } from "~/lib/crypto";
 
 export const APIRoute = createAPIFileRoute("/api/cli/token")({
-  POST: async ({ request, params }) => {
+  POST: async ({ request }) => {
     const { authPhraseId, name, machineName, operatingSystem } =
       await request.json();
 
@@ -16,9 +16,7 @@ export const APIRoute = createAPIFileRoute("/api/cli/token")({
       return json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const session = await auth.api.getSession({
-      headers: request.headers,
-    });
+    const session = await auth.api.getSession({ headers: request.headers });
 
     if (!session) {
       return json({ error: "Unauthorized" }, { status: 401 });
@@ -36,12 +34,19 @@ export const APIRoute = createAPIFileRoute("/api/cli/token")({
       return json({ error: "Auth phrase already used" }, { status: 400 });
     }
 
-    const token = nanoid();
+    const plainToken = nanoid();
+
+    const encryptedToken = encrypt(
+      plainToken,
+      process.env.AUTH_TOKEN_ENCRYPTION_KEY!
+    );
+    const hashedToken = hash(plainToken);
 
     await db.insert(authToken).values({
       id: nanoid(),
-      token: encrypt(token, process.env.AUTH_TOKEN_ENCRYPTION_KEY!),
-      firstFourCharacters: token.slice(0, 4),
+      token: encryptedToken,
+      tokenHash: hashedToken,
+      firstFourCharacters: plainToken.slice(0, 4),
       name,
       type: "cli",
       machineName,
@@ -57,6 +62,6 @@ export const APIRoute = createAPIFileRoute("/api/cli/token")({
       .set({ isUsed: true })
       .where(eq(authPhrase.id, authPhraseId));
 
-    return json({ message: "CLI token created successfully" });
+    return json({ message: "Token created successfully" });
   },
 });
