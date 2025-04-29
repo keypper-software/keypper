@@ -32,10 +32,8 @@ function RouteComponent() {
     projectSlug,
     workspaceSlug,
   });
-  const { secrets, secretsLoading, getChangesCount, mutate } = useSecrets(
-    workspaceSlug,
-    projectSlug
-  );
+  const { secrets, secretsLoading, getChangesCount, mutate, saveChanges } =
+    useSecrets(workspaceSlug, projectSlug);
 
   const { environment, setEnvironment } = useEnvironmentStore(); // use this to only get env if sure it has been loaded
   // set first env
@@ -90,7 +88,9 @@ function RouteComponent() {
             </span>
           )}
 
-          <Button disabled={!noOfChanges}>Save Changes</Button>
+          <Button disabled={!noOfChanges} onClick={saveChanges}>
+            Save Changes
+          </Button>
           <AddSecretsDialog
             workspaceSlug={workspaceSlug}
             projectSlug={projectSlug}

@@ -148,7 +148,10 @@ const Secret = ({ secret }: SecretProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {hideValue ? (
+         {
+          !isDeleted && (
+            <>
+               {hideValue ? (
               <DropdownMenuItem
                 onClick={() => {
                   fetchSecret();
@@ -162,6 +165,9 @@ const Secret = ({ secret }: SecretProps) => {
                 Hide
               </DropdownMenuItem>
             )}
+            </>
+          )
+         }
 
             {!isDeleted ? (
               <DropdownMenuItem onClick={() => handleDeleteSecret(secret.id)}>

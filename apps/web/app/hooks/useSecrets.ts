@@ -60,30 +60,50 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     },
   });
 
-  const parseEditedCode = () => {};
+  const parseEditedCode = () => {
+    const changes = filteredSecrets
+      .filter((secret) => {
+        return secret.deleted || secret.newKey || secret.newValue;
+      })
+      .map((secret) => {
+        return {
+          id: secret.id,
+          environment: secret.env,
+          key: secret.newKey,
+          shouldDelete: secret.deleted || false,
+          value: secret.newValue,
+        };
+      });
+    console.log(changes);
+    return changes;
+  };
 
-  const handleSaveChanges = useMutation({
-    mutationFn: async () => {
-      if (!getChangesCount()) return;
-      try {
-        const updatedSecrets = parseEditedCode();
-        await api.post(
-          `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`,
-          { secrets: updatedSecrets }
-        );
-        toast.success("Secrets updated successfully");
-      } catch (error) {
-        toast.error("Failed to save secrets");
-      } finally {
-      }
-    },
-  });
+  
+  // const handleSaveChanges = useMutation({
+  //   mutationFn: async () => {
+  //     if (!getChangesCount()) return;
+  //     try {
+  //       const updatedSecrets = parseEditedCode();
+  //       await api.post(
+  //         `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`,
+  //         { secrets: updatedSecrets }
+  //       );
+  //       toast.success("Secrets updated successfully");
+  //     } catch (error) {
+  //       toast.error("Failed to save secrets");
+  //     } finally {
+  //     }
+  //   },
+  // });
 
   const getChangesCount = () => {
     return filteredSecrets.reduce((count, secret) => {
       let changeCount = 0;
 
-      if (secret.newKey !== undefined && secret.newKey !== secret.key || secret.deleted) {
+      if (
+        (secret.newKey !== undefined && secret.newKey !== secret.key) ||
+        secret.deleted
+      ) {
         changeCount++;
       }
 
@@ -97,6 +117,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
       return count + changeCount;
     }, 0);
   };
+
   const getOriginalValue = async (key: string, id: string) => {
     try {
       const response = await api.get(
@@ -154,8 +175,8 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     mutateAsync,
     getOriginalValue,
     getChangesCount,
-    updating: handleSaveChanges.isPending,
-    saveChanges: handleSaveChanges.mutateAsync,
+    updating: false,
+    saveChanges: parseEditedCode,
     handleDeleteSecret,
     undoDeleteSecret: removeDeleteSecret,
   };
