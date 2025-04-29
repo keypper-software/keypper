@@ -1,7 +1,8 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useRouter, useSearch } from "@tanstack/react-router";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/interface/button";
 import Card from "~/components/interface/card";
@@ -20,9 +21,26 @@ export const Route = createFileRoute("/(auth)/auth/cli/")({
 });
 
 function RouteComponent() {
+  const looseSearch = useSearch({ strict: false }) as { phrase?: string };
   const [authPhrase, setAuthPhrase] = useState("");
   const [tokenName, setTokenName] = useState("");
   const [isAuthPhraseValid, setIsAuthPhraseValid] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    if (looseSearch?.phrase) {
+      const regexp = /^([a-z]+)(-[a-z]+){4,}$/;
+      const valid = looseSearch?.phrase.match(regexp);
+      valid && setAuthPhrase(looseSearch.phrase);
+
+      router.navigate({
+        replace: true,
+        search: {
+          // @ts-ignore
+          phrase: undefined,
+        },
+      });
+    }
+  }, [looseSearch]);
 
   const {
     mutate: verifyAuthPhraseMutation,
