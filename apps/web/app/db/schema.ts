@@ -95,6 +95,7 @@ export const authPhrase = pgTable("auth_phrase", {
 export const authToken = pgTable("auth_token", {
   id: text("id").primaryKey(),
   token: text("token").notNull(),
+  tokenHash: text("token_hash").notNull(),
   firstFourCharacters: text("first_four_characters").notNull(),
   name: text("name").notNull(),
   type: text("type").notNull(),
