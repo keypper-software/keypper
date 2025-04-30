@@ -1,4 +1,4 @@
-import getColor from "../utils/get-color";
+import getColor from "@/utils/get-color";
 
 export default async () => {
   try {

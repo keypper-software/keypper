@@ -2,8 +2,8 @@ import {
   COLOR_STYLE,
   COLOR_STYLE_TYPE,
   COLORS_TYPE,
-} from "../constants/colors";
-import { COLORS } from "../constants/colors";
+} from "@/constants/colors";
+import { COLORS } from "@/constants/colors";
 
 interface Params {
   color?: COLORS_TYPE;

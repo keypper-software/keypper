@@ -1,4 +1,4 @@
-import { STORAGE_PATH } from "../constants";
+import { STORAGE_PATH } from "@/constants";
 import path from "node:path";
 import fs from "fs/promises";
 

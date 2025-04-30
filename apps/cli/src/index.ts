@@ -2,9 +2,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 import cli from "./cli";
-import login from "./actions/login";
-import { VERSION } from "./constants";
-import logout from "./actions/logout";
+import login from "@/actions/login";
+import { VERSION } from "@/constants";
+import logout from "@/actions/logout";
 
 cli
   .name("keypper")

@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/": ["./src/*"]
+      "@/*": ["./src/*"]
     },
     "target": "es2016",
     "module": "commonjs",
@@ -10,6 +10,10 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "outDir": "build",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "plugins": [{ "transform": "typescript-transform-paths" }] 
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   }
 }

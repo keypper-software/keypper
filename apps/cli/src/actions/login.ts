@@ -1,12 +1,12 @@
-import getColor from "../utils/get-color";
-import getUrl from "../utils/get-url";
+import getColor from "@/utils/get-color";
+import getUrl from "@/utils/get-url";
 import open from "open";
 import { log } from "../cli";
-import { initializeLogin, verifyLogin } from "../api/auth";
-import getMachineInfo from "../utils/get-machine-info";
+import { initializeLogin, verifyLogin } from "@/api/auth";
+import getMachineInfo from "@/utils/get-machine-info";
 import { isAxiosError } from "axios";
-import storage from "../utils/storage";
-import { VERSION, AUTH_UPDATE_INTERVAL } from "../constants/index";
+import storage from "@/utils/storage";
+import { VERSION, AUTH_UPDATE_INTERVAL } from "@/constants/index";
 import clipboardy from "clipboardy";
 export default async () => {
   log.text = "Initializing authentication";

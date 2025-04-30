@@ -1,4 +1,4 @@
-import os, { homedir } from "node:os";
+import os from "node:os";
 export default () => {
   let operatingSystem;
   switch (os.platform()) {
