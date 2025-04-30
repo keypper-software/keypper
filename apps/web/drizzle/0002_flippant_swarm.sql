@@ -1,0 +1,1 @@
+ALTER TABLE "auth_token" ADD COLUMN "token_hash" text NOT NULL;

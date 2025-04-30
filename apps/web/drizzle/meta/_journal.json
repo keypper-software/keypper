@@ -15,6 +15,13 @@
       "when": 1745861348971,
       "tag": "0001_safe_thunderbird",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1745998971412,
+      "tag": "0002_flippant_swarm",
+      "breakpoints": true
     }
   ]
 }
