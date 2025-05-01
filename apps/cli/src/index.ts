@@ -1,11 +1,13 @@
-// #!/usr/bin/env node
+#!/usr/bin/env node
+
 import dotenv from "dotenv";
 dotenv.config();
 import cli from "./cli";
 import login from "@/actions/login";
 import { VERSION } from "@/constants";
 import logout from "@/actions/logout";
-import selectWorkspace from "./actions/select-workspace";
+import initWorkspace from "./actions/init-workspace";
+import runner from "./actions/runner";
 
 cli
   .name("keypper")
@@ -21,20 +23,14 @@ cli
 
 cli
   .command("init")
-  .description("Initialize Keypper configuration in your project");
+  .description("Initialize Keypper configuration in your project")
+  .action(initWorkspace);
 
 cli
   .command("run")
   .description("Run a command in the context of your Keypper workspace")
-  .argument("<command...>", "Command to run");
-
-cli
-  .command("workspace")
-  .option("-n, --name <name>", "Select a workspace By name")
-  .description(
-    "Manage your workspace, ignores the workspace defined in the config file"
-  )
-  .action(selectWorkspace);
+  .argument("<command...>", "Command to run")
+  .action(runner)
 
 cli
   .command("project")

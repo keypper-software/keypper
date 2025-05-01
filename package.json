@@ -32,5 +32,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "cli": "link:apps/cli"
+  }
 }

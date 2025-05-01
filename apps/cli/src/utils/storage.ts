@@ -16,6 +16,14 @@ export interface StorageOBJ {
   };
 }
 
+export interface WorkspaceConfig {
+  identifiers: {
+    workspaceId: string;
+    projectId: string;
+    environmentId: string;
+  };
+}
+
 export default async () => {
   try {
     await fs.mkdir(STORAGE_PATH, { recursive: true });
@@ -64,12 +72,27 @@ export default async () => {
       await checkFile(storage3);
     };
 
+    const createTempDir = () => {};
+
+    const storage4 = path.join(process.cwd(), "keypper.json");
+    const createWorkspaceConfig = async (data: WorkspaceConfig) => {
+      await checkFile(storage4);
+      await fs.writeFile(storage4, JSON.stringify(data, null, 2), "utf-8");
+    };
+    const getWorkspaceConfig = async () => {
+      return JSON.parse(
+        (await fs.readFile(storage4, "utf-8")) || "{}"
+      ) as WorkspaceConfig;
+    };
+
     return {
       writeToStore,
       readFromStore,
       initLogs,
       // readFromFile,
       checkFile,
+      getWorkspaceConfig,
+      createWorkspaceConfig,
       paths: {
         store: storage1,
         logs: storage2,

@@ -1,7 +1,6 @@
 {
   "name": "cli",
   "version": "0.0.0",
-  "private": true,
   "description": "Keyyper CLI",
   "main": "build/index.js",
   "repository": {
@@ -11,25 +10,27 @@
   "license": "MIT",
   "homepage": "https://github.com/Keyyper-software/keyyper",
   "keywords": [
-    "keyyper",
+    "keypper",
     "cli"
   ],
   "engines": {
     "node": ">=18.0.0"
   },
   "bin": {
-    "keyyper": "./build/index.js"
+    "keypper": "./build/index.js"
   },
   "files": [
     "build"
   ],
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon -I",
     "build": "tspc",
     "start": "node build/index.js",
+    "start:dev": "pnpm ts-node ./src/index.ts",
     "test": "echo 'test script'",
     "lint": "echo 'lint script'",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "publish:local": "pnpm build && pnpm link --global"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -39,6 +40,7 @@
     "@types/helmet": "^4.0.0",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.14.0",
+    "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
