@@ -6,6 +6,7 @@ import {
 } from "@/api/workspaces";
 import { log } from "@/cli";
 import getColor from "@/utils/get-color";
+import logger from "@/utils/logger";
 import storage from "@/utils/storage";
 import { isAxiosError } from "axios";
 import inquirer from "inquirer";
@@ -15,11 +16,6 @@ export interface SelectWorkspaceOptions {
 
 export default async (options: SelectWorkspaceOptions) => {
   try {
-    // log.text = getColor({
-    //   color: "CYAN",
-    //   text: "Getting Available Workspaces",
-    // });
-    // log.start()
     // TODO[]: CHECK KEYPPER CONFIG BEFORE OVERWRITT
     const store = await storage();
     const { data: allWorkspace } = await getWorkspaces();
@@ -47,7 +43,7 @@ export default async (options: SelectWorkspaceOptions) => {
       isEmptyMessage(`⚠️- There are no projects this workspace.`);
       process.exit(1);
     }
-    
+
     const { selectedProject } = await inquirer.prompt({
       type: "list",
       name: "selectedProject",
@@ -112,15 +108,13 @@ export default async (options: SelectWorkspaceOptions) => {
     // dump to temp
     // TODO:[] work on offline mode
     console.clear();
-    console.log(
-      "Keypper config has been initialized at the current directory."
+
+    logger("✅ Keypper config has been initialized at the current directory.");
+    logger(
+      " Run `Keypper run [command] to use environments visit docs.keypper.co/commands#run to learn more",
+      { style: "DIM" }
     );
-    console.log(
-      getColor({
-        style: "DIM",
-        text: " Run `Keypper run [command] to use environments ",
-      })
-    );
+
     process.exit(0);
   } catch (error) {
     handleError(error);
@@ -135,36 +129,28 @@ const handleError = (error: any) => {
   if (isAxiosError(error)) {
     const { response } = error;
     if (response?.status == 401) {
-      console.log(
-        getColor({
-          color: "RED",
-          text: "⚠️- Unauthorized. Please log in first.",
-        })
-      );
-      console.log("Run `keypper login` to authenticate.");
-      console.log(
-        getColor({
-          style: "DIM",
-          text: "Learn more: https://docs.keypper.dev/v1/authenication#login",
-        })
-      );
+      logger("⚠️- Unauthorized. Please log in first.", { color: "RED" });
     }
-    console.log(response?.config.url);
+    logger(
+      `⚠️-  ${response?.data?.error || ""} Are you sure you are logged in to the right workspace?`,
+      { color: "RED" }
+    );
+    logger("Run `keypper login` to authenticate.");
+    logger("Learn more: https://docs.keypper.co/v1/authenication#login", {
+      style: "DIM",
+    });
   }
+
+  logger(`⚠️- An unknown error occurred, please try again.`, { color: "RED" });
+  process.exit(1);
 };
 
 const isEmptyMessage = (message: string) => {
   console.clear();
-  console.log(
-    getColor({
-      color: "YELLOW",
-      text: message,
-    })
-  );
-  console.log(
-    getColor({
-      style: "DIM",
-      text: "Visit: https://keypper.co to create manage workspaces, projects, environments and secrets.",
-    })
+  logger(message, { color: "YELLOW" });
+
+  logger(
+    "Visit: https://keypper.co to create manage workspaces, projects, environments and secrets.",
+    { style: "DIM" }
   );
 };

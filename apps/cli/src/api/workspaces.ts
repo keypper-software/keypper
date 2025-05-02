@@ -22,7 +22,7 @@ export type getSeretsResponse = {
 };
 
 export const getWorkspaces = () => {
-  return api.get<getWorkspaceResponse>("/cli/workspaces");
+  return api.get<getWorkspaceResponse>("/cli");
 };
 
 export const getWorkspaceProjects = ({

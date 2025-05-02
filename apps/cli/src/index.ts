@@ -30,12 +30,7 @@ cli
   .command("run")
   .description("Run a command in the context of your Keypper workspace")
   .argument("<command...>", "Command to run")
-  .action(runner)
-
-cli
-  .command("project")
-  .description("Select a project from a defined workspace")
-  .option("-n, --name <name>", "Select a project By name");
+  .action(runner);
 
 cli
   .command("whoami")
