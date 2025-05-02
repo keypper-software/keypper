@@ -1,3 +1,5 @@
+import { BASE_URL } from "@/constants";
+
 export default (url: string) => {
-  return `${process.env.BASE_URL||""}${url.startsWith("/") ? url : "/" + url}`;
+  return `${BASE_URL}${url.startsWith("/") ? url : "/" + url}`;
 };

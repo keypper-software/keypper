@@ -1,13 +1,14 @@
-import getColor from "../utils/get-color";
-import getUrl from "../utils/get-url";
+import getColor from "@/utils/get-color";
+import getUrl from "@/utils/get-url";
 import open from "open";
 import { log } from "../cli";
-import { initializeLogin, verifyLogin } from "../api/auth";
-import getMachineInfo from "../utils/get-machine-info";
+import { initializeLogin, verifyLogin } from "@/api/auth";
+import getMachineInfo from "@/utils/get-machine-info";
 import { isAxiosError } from "axios";
-import storage from "../utils/storage";
-import { VERSION, AUTH_UPDATE_INTERVAL } from "../constants/index";
+import storage from "@/utils/storage";
+import { VERSION, AUTH_UPDATE_INTERVAL } from "@/constants/index";
 import clipboardy from "clipboardy";
+import logger from "@/utils/logger";
 export default async () => {
   log.text = "Initializing authentication";
   log.start();
@@ -41,26 +42,24 @@ export default async () => {
     });
 
     console.clear();
-    console.log("Paste these phrase to authenticate:");
-    console.log(getColor({ text: initLogin.phrase, color: "GREEN" }));
-
-    log.text = "Opening browser for authentication";
+    logger("Paste these phrase to authenticate:");
+    logger(initLogin.phrase, { color: "GREEN" });
     const url = getUrl(
       `auth/cli?medium=cli&phrase=${encodeURIComponent(initLogin.phrase)}`
     );
+    logger(`you can also open this URL manually:\n ${url} to authenticate`, {
+      style: "DIM",
+    });
+    log.text = "Opening browser for authentication";
 
     try {
       await clipboardy.write(initLogin.phrase);
       await open(url, { wait: false });
+
       // throw new Error("Browser opening is disabled for testing purposes");
     } catch (openError) {
-      console.log(
-        getColor({
-          text: "⚠️ Could not automatically open browser",
-          color: "YELLOW",
-        })
-      );
-      console.log(`Please open this URL manually: ${url}`);
+      logger("⚠️ Could not automatically open browser", { color: "YELLOW" });
+      logger(`Please open this URL manually: ${url}`);
     }
 
     log.text = getColor({
@@ -111,14 +110,12 @@ export default async () => {
 
         log.stop();
         console.clear();
-        console.log(
-          getColor({
-            text: "✅ Authentication successful",
-            color: "GREEN",
-          })
-        );
-        console.log(
-          "Run keypper --help to learn more about Keypper CLI or visit https://docs.keypper.dev"
+        logger("✅ Authentication successful", {
+          color: "GREEN",
+        });
+
+        logger(
+          "Run `keypper init` to initialize Keypper with your project, visit https://docs.keypper.co to learn more about Keypper CLI"
         );
 
         process.exit(0);
@@ -142,7 +139,7 @@ function handleError(error: any) {
   log.stop();
   console.clear();
 
-  console.log(getColor({ text: "❌ Authentication failed", color: "RED" }));
+  logger("❌ Authentication failed", { color: "RED" });
 
   const errorMessage = isAxiosError(error)
     ? error?.response?.data?.error || "Server connection error"
@@ -154,12 +151,12 @@ function handleError(error: any) {
     errorMessage.includes("timeout") ||
     errorMessage.includes("Authentication timeout")
   ) {
-    console.log(
-      "For help visit: https://docs.keypper.dev/v1/cli?troubleshoot=cli-authentication-timeout"
+    logger(
+      "For help visit: https://docs.keypper.co/v1/cli?troubleshoot=cli-authentication-timeout"
     );
   } else if (errorMessage.includes("connection") || isAxiosError(error)) {
-    console.log(
-      "Check your internet connection or visit: https://docs.keypper.dev/v1/cli?troubleshoot=connection-issues"
+    logger(
+      "Check your internet connection or visit: https://docs.keypper.co/v1/cli?troubleshoot=connection-issues"
     );
   }
 
