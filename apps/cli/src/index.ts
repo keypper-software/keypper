@@ -29,6 +29,11 @@ cli
 cli
   .command("run")
   .description("Run a command in the context of your Keypper workspace")
+  .option(
+    "-i, --ignore",
+    "Ignore errors or warnings related to keypper (optional value)",
+    false
+  )
   .argument("<command...>", "Command to run")
   .action(runner);
 
