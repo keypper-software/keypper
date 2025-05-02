@@ -1,4 +1,5 @@
 import { getSecrets } from "@/api/workspaces";
+import secretsCache from "@/utils/cache/secrets-cache";
 import logger from "@/utils/logger";
 import storage from "@/utils/storage";
 import { isAxiosError } from "axios";
@@ -49,6 +50,9 @@ export default async (options: string[], args: RunnerArgs) => {
       identifiers: { environmentId, projectId, workspaceId },
     } = config;
 
+    const cache = await secretsCache({ environmentId, projectId, workspaceId });
+    const cached = await cache.getCache();
+
     const {
       data: { secrets },
     } = await getSecrets({
@@ -61,14 +65,23 @@ export default async (options: string[], args: RunnerArgs) => {
           color: "YELLOW",
         });
         return { data: { secrets: [] } };
-      } else {
-        throw err;
       }
+
+      if (cached) {
+        logger("Using cached secrets", { style: "DIM" });
+        return {
+          data: {
+            secrets: cached,
+          },
+        };
+      }
+      throw err;
     });
 
     const envVars = Object.fromEntries(
       secrets.map((secret: any) => [secret.key, secret.value])
     );
+
     startChildProcess(command, envVars);
   } catch (error) {
     handleError(error);
@@ -94,6 +107,7 @@ const handleError = (error: any) => {
     process.exit(1);
   }
 
+  logger(error, { style: "DIM" });
   if (String(error).includes("no such file or directory")) {
     logger("⚠️- Keypper config missing", {
       color: "YELLOW",

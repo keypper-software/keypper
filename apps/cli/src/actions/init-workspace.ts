@@ -5,6 +5,7 @@ import {
   getWorkspaces,
 } from "@/api/workspaces";
 import { log } from "@/cli";
+import secretsCache from "@/utils/cache/secrets-cache";
 import getColor from "@/utils/get-color";
 import logger from "@/utils/logger";
 import storage from "@/utils/storage";
@@ -96,6 +97,12 @@ export default async (options: SelectWorkspaceOptions) => {
 
       !confirmEmptyEnv && process.exit(1);
     }
+    const cache = await secretsCache({
+      environmentId: selectedEnv,
+      projectId: selectedProject,
+      workspaceId: selectedWorkspace,
+    });
+    await cache.generateCache(allSecrets);
 
     await store.createWorkspaceConfig({
       identifiers: {
