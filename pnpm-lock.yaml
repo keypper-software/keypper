@@ -4,9 +4,16 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  cli: link:apps/cli
+
 importers:
 
   .:
+    dependencies:
+      cli:
+        specifier: link:apps/cli
+        version: link:apps/cli
     devDependencies:
       prettier:
         specifier: ^3.5.3
