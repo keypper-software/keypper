@@ -1,4 +1,4 @@
-import { getSecrets } from "@/api/workspaces";
+import { getSecrets, Secret } from "@/api/workspaces";
 import secretsCache from "@/utils/cache/secrets-cache";
 import logger from "@/utils/logger";
 import storage from "@/utils/storage";
@@ -7,11 +7,13 @@ import { exec } from "node:child_process";
 
 interface RunnerArgs {
   ignore?: boolean;
+  cache?: boolean;
 }
 
 export default async (options: string[], args: RunnerArgs) => {
   try {
     const ignoreErrors = !!args?.ignore;
+    const allowCache = !!args.cache;
     const command = options.join(" ");
 
     const store = await storage();
@@ -50,8 +52,16 @@ export default async (options: string[], args: RunnerArgs) => {
       identifiers: { environmentId, projectId, workspaceId },
     } = config;
 
-    const cache = await secretsCache({ environmentId, projectId, workspaceId });
-    const cached = await cache.getCache();
+    let cached: Secret[];
+    
+    if (allowCache) {
+      const cache = await secretsCache({
+        environmentId,
+        projectId,
+        workspaceId,
+      });
+      cached = await cache.getCache();
+    }
 
     const {
       data: { secrets },
