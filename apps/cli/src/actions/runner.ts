@@ -52,16 +52,11 @@ export default async (options: string[], args: RunnerArgs) => {
       identifiers: { environmentId, projectId, workspaceId },
     } = config;
 
-    let cached: Secret[];
-    
-    if (allowCache) {
-      const cache = await secretsCache({
-        environmentId,
-        projectId,
-        workspaceId,
-      });
-      cached = await cache.getCache();
-    }
+    const cache = await secretsCache({
+      environmentId,
+      projectId,
+      workspaceId,
+    });
 
     const {
       data: { secrets },
@@ -69,24 +64,29 @@ export default async (options: string[], args: RunnerArgs) => {
       environmentId,
       projectId,
       workspaceId,
-    }).catch((err) => {
-      if (ignoreErrors) {
-        logger("⚠️- skipping keypper errors/warnings due to --ignore flag", {
-          color: "YELLOW",
-        });
-        return { data: { secrets: [] } };
-      }
+    })
+      .then(async (res) => {
+        await cache.generateCache(res.data.secrets);
+        return res;
+      })
+      .catch(async (err) => {
+        if (ignoreErrors) {
+          logger("⚠️- skipping keypper errors/warnings due to --ignore flag", {
+            color: "YELLOW",
+          });
+          return { data: { secrets: [] } };
+        }
 
-      if (cached) {
-        logger("Using cached secrets", { style: "DIM" });
-        return {
-          data: {
-            secrets: cached,
-          },
-        };
-      }
-      throw err;
-    });
+        if (allowCache) {
+          const cached = await cache.getCache();
+          return {
+            data: {
+              secrets: cached || [],
+            },
+          };
+        }
+        throw err;
+      });
 
     const envVars = Object.fromEntries(
       secrets.map((secret: any) => [secret.key, secret.value])

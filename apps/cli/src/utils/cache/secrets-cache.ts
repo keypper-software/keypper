@@ -18,14 +18,23 @@ export default async ({ workspaceId, environmentId, projectId }: Params) => {
   const { user, machine } = getMachineInfo();
   const CACHE_INDEX = Date.now();
   const KEY = `${user}|${machine}`;
-  const CACHE_RAW_HASH = `${cwd}|${machine}|${user}|${workspaceId}|${projectId}|${environmentId}`;
-  const CACHE_HASH = crypto
-    .createHash("sha256")
-    .update(CACHE_RAW_HASH)
-    .digest("hex");
+
+  const generateHash = () => {
+    const CACHE_RAW_HASH = `${cwd}|${machine}|${user}|${workspaceId}|${projectId}|${environmentId}`;
+    const CACHE_HASH = crypto
+      .createHash("sha256")
+      .update(CACHE_RAW_HASH)
+      .digest("hex");
+
+    return {
+      CACHE_HASH,
+      CACHE_RAW_HASH,
+    };
+  };
 
   const generateCache = async (data: Secret[]) => {
     try {
+      const { CACHE_HASH } = generateHash();
       const CACHE_FILE = path.join(
         STORAGE_PATH,
         ".keypper-cache",
@@ -35,13 +44,14 @@ export default async ({ workspaceId, environmentId, projectId }: Params) => {
       await fs.mkdir(path.dirname(CACHE_FILE), { recursive: true });
       const cacheContent = encrypt(JSON.stringify(data), KEY);
       await fs.writeFile(CACHE_FILE, cacheContent, "utf-8");
-      console.log("> cached created", CACHE_INDEX);
+      logger(`cached recovered >>> ${CACHE_INDEX}`, { style: "DIM" });
     } catch (error) {
       logger("cached missed", { style: "DIM" });
     }
   };
 
   const getCache = async () => {
+    const { CACHE_HASH } = generateHash();
     const CACHE_DIR = path.join(STORAGE_PATH, ".keypper-cache", CACHE_HASH);
     await fs.mkdir(CACHE_DIR, { recursive: true });
     try {

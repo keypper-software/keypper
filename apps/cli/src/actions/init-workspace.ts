@@ -102,6 +102,7 @@ export default async (options: SelectWorkspaceOptions) => {
       projectId: selectedProject,
       workspaceId: selectedWorkspace,
     });
+    
     await cache.generateCache(allSecrets);
 
     await store.createWorkspaceConfig({
