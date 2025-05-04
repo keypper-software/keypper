@@ -1,4 +1,10 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { user, organization } from "../../auth-schema";
 
@@ -14,6 +20,7 @@ export const project = pgTable("project", {
   organizationId: text("organization_id")
     .notNull()
     .references(() => organization.id),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const projectRelations = relations(project, ({ one }) => ({
@@ -31,6 +38,7 @@ export const environment = pgTable("environment", {
   projectId: text("project_id")
     .notNull()
     .references(() => project.id),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const branch = pgTable("branch", {
@@ -41,6 +49,7 @@ export const branch = pgTable("branch", {
   environmentId: text("environment_id")
     .notNull()
     .references(() => environment.id),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const secret = pgTable("secret", {
@@ -55,7 +64,8 @@ export const secret = pgTable("secret", {
   addedBy: text("added_by")
     .notNull()
     .references(() => user.id),
-  version: text("version").notNull(), // e.g., "v1", "v2"
+  version: integer("version").notNull(),
+  deletedAt: timestamp("deleted_at"),
 });
 
 export const secretVersion = pgTable("secret_version", {
@@ -63,9 +73,10 @@ export const secretVersion = pgTable("secret_version", {
   secretId: text("secret_id")
     .notNull()
     .references(() => secret.id),
+  key: text("key").notNull(),
   value: text("value").notNull(),
   createdAt: timestamp("created_at").notNull(),
-  version: text("version").notNull(), // e.g., "v1", "v2"
+  version: integer("version").notNull(),
 });
 
 export const auditLog = pgTable("audit_log", {
