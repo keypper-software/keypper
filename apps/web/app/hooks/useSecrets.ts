@@ -74,11 +74,9 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
           value: secret.newValue,
         };
       });
-    console.log(changes);
     return changes;
   };
 
-  
   // const handleSaveChanges = useMutation({
   //   mutationFn: async () => {
   //     if (!getChangesCount()) return;
@@ -179,5 +177,6 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     saveChanges: parseEditedCode,
     handleDeleteSecret,
     undoDeleteSecret: removeDeleteSecret,
+    fetchSecrets: mutate,
   };
 }
