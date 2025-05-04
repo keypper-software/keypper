@@ -11,9 +11,13 @@ import { useSecrets } from "~/hooks/useSecrets";
 import AddSecretsDialog from "~/components/workspace/projects/modals/add-secrets";
 import SecretsList from "~/components/workspace/projects/secrets-list";
 import useEnvironmentStore from "~/stores/environment";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useEnvironments from "~/hooks/useEnvironments";
 import { Button } from "~/components/interface/button";
+import api from "~/api";
+import axios from "axios";
+import { toast } from "sonner";
+import useSecretsStore from "~/stores/secrets";
 
 export const Route = createFileRoute(
   "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/"
@@ -32,8 +36,17 @@ function RouteComponent() {
     projectSlug,
     workspaceSlug,
   });
-  const { secrets, secretsLoading, getChangesCount, mutate, saveChanges } =
-    useSecrets(workspaceSlug, projectSlug);
+  const {
+    secrets,
+    secretsLoading,
+    getChangesCount,
+    mutate,
+    saveChanges,
+    fetchSecrets,
+    mutateAsync,
+  } = useSecrets(workspaceSlug, projectSlug);
+
+  const { setSecrets } = useSecretsStore();
 
   const { environment, setEnvironment } = useEnvironmentStore(); // use this to only get env if sure it has been loaded
   // set first env
@@ -46,6 +59,25 @@ function RouteComponent() {
   }, [environment]);
 
   const noOfChanges = getChangesCount();
+  const [saveChangesLoading, setSaveChangesLoading] = useState(false);
+
+  const handleSaveChanges = async () => {
+    try {
+      setSaveChangesLoading(true);
+      const changes = saveChanges();
+
+      await axios.put(`/api/${workspaceSlug}/${projectSlug}/secrets`, {
+        secrets: changes,
+      });
+
+      toast.success("Changes saved successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save changes");
+    } finally {
+      setSaveChangesLoading(false);
+    }
+  };
 
   if (environmentsLoading) {
     return (
@@ -88,7 +120,11 @@ function RouteComponent() {
             </span>
           )}
 
-          <Button disabled={!noOfChanges} onClick={saveChanges}>
+          <Button
+            disabled={!noOfChanges}
+            onClick={handleSaveChanges}
+            isLoading={saveChangesLoading}
+          >
             Save Changes
           </Button>
           <AddSecretsDialog
