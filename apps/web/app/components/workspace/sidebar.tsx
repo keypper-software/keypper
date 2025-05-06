@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Dropdown from "~/components/interface/dropdown";
 import { ChevronDown, ChevronsDown, LogOut } from "lucide-react";
 import { Link, useRouter } from "@tanstack/react-router";
@@ -16,13 +16,22 @@ import { useWorkspaceStore } from "~/stores/workspace";
 import { Button } from "../interface/button";
 import { auth } from "~/lib/auth";
 import { authClient } from "~/lib/auth-client";
+import axios from "axios";
 
 const Sidebar = () => {
-  const workspaces = ["Bllow Platforms", "Orca Studios", "Personal"];
-  const [selectedWorkspace, setSelectedWorkspace] = useState(workspaces[0]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const { currentWorkspace } = useWorkspaceStore();
+  const { currentWorkspace, workspaces, setCurrentWorkspace, setWorkspaces } =
+    useWorkspaceStore();
+
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      const { data } = await axios.get("/api/workspaces");
+      setWorkspaces(data);
+      setCurrentWorkspace(data[0]);
+    };
+    fetchWorkspaces();
+  }, []);
   const workspaceSlug = currentWorkspace?.slug!;
 
   const links = [
@@ -110,7 +119,7 @@ const Sidebar = () => {
       </div>
       <div className="absolute bottom-0 left-0 right-0 p-5 w-full">
         <button className="flex items-center justify-between gap-2 p-2 cursor-pointer w-full hover:bg-white/10 transition-all duration-300 rounded-md text-[#6D6F7E] hover:text-white/90">
-          <span className="text-sm">Bllow Platforms</span>{" "}
+          <span className="text-sm">{currentWorkspace?.name}</span>{" "}
           <ChevronDown size={16} />
         </button>
       </div>

@@ -1,5 +1,5 @@
 import { json } from "@tanstack/react-start";
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createAPIFileRoute } from "@tanstack/start/api";
 import { nanoid } from "nanoid";
 import { db } from "~/db";
 import { secret, auditLog, secretVersion, project } from "~/db/schema";

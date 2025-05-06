@@ -1,52 +1,56 @@
 import { json } from "@tanstack/react-start";
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createAPIFileRoute } from "@tanstack/start/api";
 import { z } from "zod";
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
+import axios from "axios";
+
+// Configure axios with base URL
 
 export const APIRoute = createAPIFileRoute("/api/ai/chat")({
   POST: async ({ request, params }) => {
+    const api = axios.create({
+      baseURL: process.env.API_URL || "http://localhost:3001",
+      headers: {
+        Cookie: request.headers.get("Cookie"),
+      },
+    });
+
     try {
-      const { messages } = await request.json();
+      const { messages, workspaceSlug, selectedProject, selectedEnvironment } =
+        await request.json();
+
+      if (!workspaceSlug) {
+        return json({ error: "No workspace selected" }, { status: 400 });
+      }
 
       const result = streamText({
-        model: google("models/gemini-2.0-flash-exp"),
+        model: google("gemini-2.5-pro-exp-03-25"),
         messages,
         tools: {
           // Workspace Project Management
           listOrCreateProjects: {
             description: "List or create projects in a workspace",
             parameters: z.object({
-              workspaceSlug: z.string(),
               action: z.enum(["list", "create"]),
               name: z.string().optional(),
               description: z.string().optional(),
             }),
-            execute: async ({ workspaceSlug, action, name, description }) => {
+            execute: async ({ action, name, description }) => {
               if (action === "list") {
-                const response = await fetch(`/api/${workspaceSlug}/projects`);
-                if (!response.ok) {
-                  throw new Error(
-                    `Failed to fetch projects: ${response.statusText}`
-                  );
-                }
-                const data = await response.json();
-                return JSON.stringify(data, null, 2);
+                const response = await api.get(
+                  `/api/${workspaceSlug}/projects`
+                );
+                return JSON.stringify(response.data, null, 2);
               } else {
-                const response = await fetch(`/api/${workspaceSlug}/projects`, {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ name, description }),
-                });
-                if (!response.ok) {
-                  throw new Error(
-                    `Failed to create project: ${response.statusText}`
-                  );
-                }
-                const data = await response.json();
-                return JSON.stringify(data, null, 2);
+                const response = await api.post(
+                  `/api/${workspaceSlug}/projects`,
+                  {
+                    name,
+                    description,
+                  }
+                );
+                return JSON.stringify(response.data, null, 2);
               }
             },
           },
@@ -54,113 +58,101 @@ export const APIRoute = createAPIFileRoute("/api/ai/chat")({
           // Project Details and Secrets
           getProjectDetails: {
             description: "Get project details or reveal secrets",
-            parameters: z.object({
-              workspaceSlug: z.string(),
-              projectSlug: z.string(),
-              environmentName: z.string().optional(),
-              branchName: z.string().optional(),
-            }),
-            execute: async ({
-              workspaceSlug,
-              projectSlug,
-              environmentName,
-              branchName,
-            }) => {
-              const response = await fetch(
-                `/api/${workspaceSlug}/${projectSlug}`,
+            parameters: z.object({}),
+            execute: async () => {
+              if (!selectedProject) {
+                throw new Error("No project selected");
+              }
+              const response = await api.post(
+                `/api/${workspaceSlug}/${selectedProject}`,
                 {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ environmentName, branchName }),
+                  environmentName: selectedEnvironment || "Development",
+                  branchName: "main",
                 }
               );
-              if (!response.ok) {
-                throw new Error(
-                  `Failed to get project details: ${response.statusText}`
-                );
-              }
-              const data = await response.json();
-              return JSON.stringify(data, null, 2);
+              return JSON.stringify(response.data, null, 2);
             },
           },
 
           // Secrets Management
           manageSecrets: {
-            description: "Manage project secrets",
+            description:
+              "Manage project secrets. Use 'list' to see all secrets, 'get' to see a specific secret, 'create' to add a new secret, or 'update' to modify an existing secret.",
             parameters: z.object({
-              workspaceSlug: z.string(),
-              projectSlug: z.string(),
-              action: z.enum(["get", "create", "update"]),
-              environment: z.string(),
-              branch: z.string().optional(),
+              action: z.enum(["list", "get", "create", "update"]),
               secretName: z.string().optional(),
               secretValue: z.string().optional(),
             }),
-            execute: async ({
-              workspaceSlug,
-              projectSlug,
-              action,
-              environment,
-              branch,
-              secretName,
-              secretValue,
-            }) => {
-              const url = `/api/${workspaceSlug}/${projectSlug}/secrets`;
-              const params = new URLSearchParams({
-                environment,
-                ...(branch && { branch }),
-              });
+            execute: async ({ action, secretName, secretValue }) => {
+              if (!selectedProject) {
+                throw new Error("No project selected");
+              }
+
+              if (action === "list") {
+                try {
+                  const url = `/api/${workspaceSlug}/${selectedProject}/secrets`;
+                  const params = {
+                    environment: selectedEnvironment || "Development",
+                    branch: "main",
+                  };
+                  const response = await api.get(url, { params });
+                  return JSON.stringify({
+                    component: "secretsTable",
+                    data: response.data,
+                  });
+                } catch (error) {}
+              }
+
+              if (!secretName) {
+                throw new Error(
+                  "Secret name is required for get, create, or update operations"
+                );
+              }
+
+              const url = `/api/${workspaceSlug}/${selectedProject}/secrets`;
+              const params = {
+                environment: selectedEnvironment || "Development",
+                branch: "main",
+              };
 
               let response;
               if (action === "get") {
-                response = await fetch(`${url}?${params}`);
+                response = await api.get(`${url}/${secretName}`, { params });
+              } else if (action === "create") {
+                response = await api.post(
+                  url,
+                  { name: secretName, value: secretValue },
+                  { params }
+                );
               } else {
-                response = await fetch(`${url}?${params}`, {
-                  method: action === "create" ? "POST" : "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    name: secretName,
-                    value: secretValue,
-                  }),
-                });
-              }
-
-              if (!response.ok) {
-                throw new Error(
-                  `Failed to ${action} secrets: ${response.statusText}`
+                response = await api.put(
+                  url,
+                  { name: secretName, value: secretValue },
+                  { params }
                 );
               }
-              const data = await response.json();
-              return JSON.stringify(data, null, 2);
+
+              return JSON.stringify({
+                component: "secretsTable",
+                data: response.data,
+              });
             },
           },
 
           // Delete Secret
           deleteSecret: {
-            description: "Delete a specific secret",
+            description: "Delete a specific secret by its ID",
             parameters: z.object({
-              workspaceSlug: z.string(),
-              projectSlug: z.string(),
               secretId: z.string(),
             }),
-            execute: async ({ workspaceSlug, projectSlug, secretId }) => {
-              const response = await fetch(
-                `/api/${workspaceSlug}/${projectSlug}/secrets/${secretId}`,
-                {
-                  method: "DELETE",
-                }
-              );
-              if (!response.ok) {
-                throw new Error(
-                  `Failed to delete secret: ${response.statusText}`
-                );
+            execute: async ({ secretId }) => {
+              if (!selectedProject) {
+                throw new Error("No project selected");
               }
-              const data = await response.json();
-              return JSON.stringify(data, null, 2);
+              const response = await api.delete(
+                `/api/${workspaceSlug}/${selectedProject}/secrets/${secretId}`
+              );
+              return JSON.stringify(response.data, null, 2);
             },
           },
 
@@ -168,40 +160,23 @@ export const APIRoute = createAPIFileRoute("/api/ai/chat")({
           manageInvitations: {
             description: "Send or view workspace invitations",
             parameters: z.object({
-              workspaceSlug: z.string(),
               action: z.enum(["list", "send"]),
               emails: z.array(z.string()).optional(),
             }),
-            execute: async ({ workspaceSlug, action, emails }) => {
+            execute: async ({ action, emails }) => {
               if (action === "list") {
-                const response = await fetch(
+                const response = await api.get(
                   `/api/${workspaceSlug}/invitation`
                 );
-                if (!response.ok) {
-                  throw new Error(
-                    `Failed to list invitations: ${response.statusText}`
-                  );
-                }
-                const data = await response.json();
-                return JSON.stringify(data, null, 2);
+                return JSON.stringify(response.data, null, 2);
               } else {
-                const response = await fetch(
+                const response = await api.post(
                   `/api/${workspaceSlug}/invitation`,
                   {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ emails }),
+                    emails,
                   }
                 );
-                if (!response.ok) {
-                  throw new Error(
-                    `Failed to send invitations: ${response.statusText}`
-                  );
-                }
-                const data = await response.json();
-                return JSON.stringify(data, null, 2);
+                return JSON.stringify(response.data, null, 2);
               }
             },
           },
@@ -211,12 +186,8 @@ export const APIRoute = createAPIFileRoute("/api/ai/chat")({
             description: "Simple ping endpoint for testing",
             parameters: z.object({}),
             execute: async () => {
-              const response = await fetch("/api/ping");
-              if (!response.ok) {
-                throw new Error(`Failed to ping: ${response.statusText}`);
-              }
-              const data = await response.json();
-              return JSON.stringify(data, null, 2);
+              const response = await api.get("/api/ping");
+              return JSON.stringify(response.data, null, 2);
             },
           },
         },

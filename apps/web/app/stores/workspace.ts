@@ -4,15 +4,26 @@ interface WorkspaceState {
   currentWorkspace: {
     id: string;
     slug: string;
+    name: string;
   } | null;
 
-  setCurrentWorkspace: (workspace: { id: string; slug: string } | null) => void;
+  workspaces: {
+    id: string;
+    slug: string;
+    name: string;
+  }[];
+
+  setCurrentWorkspace: (
+    workspace: { id: string; slug: string; name: string } | null
+  ) => void;
+  setWorkspaces: (
+    workspaces: { id: string; slug: string; name: string }[]
+  ) => void;
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
-  currentWorkspace: {
-    id: "b503a479-7074-4d2b-8417-db26863e9b5d",
-    slug: "bllow",
-  },
+  currentWorkspace: null,
+  workspaces: [],
   setCurrentWorkspace: (workspace) => set({ currentWorkspace: workspace }),
+  setWorkspaces: (workspaces) => set({ workspaces }),
 }));
