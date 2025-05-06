@@ -1,4 +1,5 @@
-import { getSecrets } from "@/api/workspaces";
+import { getSecrets, Secret } from "@/api/workspaces";
+import secretsCache from "@/utils/cache/secrets-cache";
 import logger from "@/utils/logger";
 import storage from "@/utils/storage";
 import { isAxiosError } from "axios";
@@ -6,11 +7,13 @@ import { exec } from "node:child_process";
 
 interface RunnerArgs {
   ignore?: boolean;
+  cache?: boolean;
 }
 
 export default async (options: string[], args: RunnerArgs) => {
   try {
     const ignoreErrors = !!args?.ignore;
+    const allowCache = !!args.cache;
     const command = options.join(" ");
 
     const store = await storage();
@@ -49,26 +52,46 @@ export default async (options: string[], args: RunnerArgs) => {
       identifiers: { environmentId, projectId, workspaceId },
     } = config;
 
+    const cache = await secretsCache({
+      environmentId,
+      projectId,
+      workspaceId,
+    });
+
     const {
       data: { secrets },
     } = await getSecrets({
       environmentId,
       projectId,
       workspaceId,
-    }).catch((err) => {
-      if (ignoreErrors) {
-        logger("⚠️- skipping keypper errors/warnings due to --ignore flag", {
-          color: "YELLOW",
-        });
-        return { data: { secrets: [] } };
-      } else {
+    })
+      .then(async (res) => {
+        await cache.generateCache(res.data.secrets);
+        return res;
+      })
+      .catch(async (err) => {
+        if (ignoreErrors) {
+          logger("⚠️- skipping keypper errors/warnings due to --ignore flag", {
+            color: "YELLOW",
+          });
+          return { data: { secrets: [] } };
+        }
+
+        if (allowCache) {
+          const cached = await cache.getCache();
+          return {
+            data: {
+              secrets: cached || [],
+            },
+          };
+        }
         throw err;
-      }
-    });
+      });
 
     const envVars = Object.fromEntries(
       secrets.map((secret: any) => [secret.key, secret.value])
     );
+
     startChildProcess(command, envVars);
   } catch (error) {
     handleError(error);
@@ -94,6 +117,7 @@ const handleError = (error: any) => {
     process.exit(1);
   }
 
+  logger(error, { style: "DIM" });
   if (String(error).includes("no such file or directory")) {
     logger("⚠️- Keypper config missing", {
       color: "YELLOW",

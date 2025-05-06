@@ -100,7 +100,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
 
       if (
         (secret.newKey !== undefined && secret.newKey !== secret.key) ||
-        secret.deleted
+        secret.deleted || (secret.newValue !== undefined && secret.newValue !== secret.originalValue)
       ) {
         changeCount++;
       }
