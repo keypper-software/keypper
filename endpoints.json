@@ -1,0 +1,76 @@
+{
+  "endpoints": {
+    "workspace": {
+      "/api/{workspaceSlug}/projects": {
+        "methods": ["GET", "POST"],
+        "description": "List or create projects in a workspace",
+        "parameters": {
+          "path": {
+            "workspaceSlug": "string"
+          }
+        },
+        "body": {
+          "name": "string",
+          "description": "string (optional)"
+        }
+      },
+      "/api/{workspaceSlug}/{projectSlug}": {
+        "methods": ["GET", "POST"],
+        "description": "Get project details or reveal secrets",
+        "parameters": {
+          "path": {
+            "workspaceSlug": "string",
+            "projectSlug": "string"
+          }
+        },
+        "body": {
+          "environmentName": "string (optional, defaults to 'Development')",
+          "branchName": "string (optional, defaults to 'main')"
+        }
+      },
+      "/api/{workspaceSlug}/{projectSlug}/secrets": {
+        "methods": ["GET", "POST", "PUT"],
+        "description": "Manage project secrets",
+        "parameters": {
+          "path": {
+            "workspaceSlug": "string",
+            "projectSlug": "string"
+          },
+          "query": {
+            "environment": "string",
+            "branch": "string (optional, defaults to 'main')"
+          }
+        }
+      },
+      "/api/{workspaceSlug}/{projectSlug}/secrets/{secretId}": {
+        "methods": ["DELETE"],
+        "description": "Delete a specific secret",
+        "parameters": {
+          "path": {
+            "workspaceSlug": "string",
+            "projectSlug": "string",
+            "secretId": "string"
+          }
+        }
+      },
+      "/api/{workspaceSlug}/invitation": {
+        "methods": ["GET", "POST"],
+        "description": "Send workspace invitations",
+        "parameters": {
+          "path": {
+            "workspaceSlug": "string"
+          }
+        },
+        "body": {
+          "emails": "string[]"
+        }
+      }
+    },
+    "misc": {
+      "/api/ping": {
+        "methods": ["GET"],
+        "description": "Simple ping endpoint for testing"
+      }
+    }
+  }
+}
