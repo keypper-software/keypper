@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as OnboardingImport } from './routes/onboarding'
+import { Route as ChatImport } from './routes/chat'
 import { Route as AuthImport } from './routes/auth'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
@@ -43,6 +44,12 @@ const AuthenticatedWorkspaceSlugImport = createFileRoute(
 const OnboardingRoute = OnboardingImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatRoute = ChatImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -193,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatImport
       parentRoute: typeof rootRoute
     }
     '/onboarding': {
@@ -394,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/onboarding': typeof OnboardingRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
@@ -415,6 +430,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/onboarding': typeof OnboardingRoute
   '/login': typeof authLoginRoute
   '/signup': typeof authSignupRoute
@@ -435,6 +451,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/onboarding': typeof OnboardingRoute
   '/(auth)/login': typeof authLoginRoute
   '/(auth)/signup': typeof authSignupRoute
@@ -459,6 +476,7 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/auth'
+    | '/chat'
     | '/onboarding'
     | '/login'
     | '/signup'
@@ -479,6 +497,7 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/auth'
+    | '/chat'
     | '/onboarding'
     | '/login'
     | '/signup'
@@ -497,6 +516,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/chat'
     | '/onboarding'
     | '/(auth)/login'
     | '/(auth)/signup'
@@ -520,6 +540,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ChatRoute: typeof ChatRoute
   OnboardingRoute: typeof OnboardingRoute
   authLoginRoute: typeof authLoginRoute
   authSignupRoute: typeof authSignupRoute
@@ -531,6 +552,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
+  ChatRoute: ChatRoute,
   OnboardingRoute: OnboardingRoute,
   authLoginRoute: authLoginRoute,
   authSignupRoute: authSignupRoute,
@@ -551,6 +573,7 @@ export const routeTree = rootRoute
         "/",
         "/_authenticated",
         "/auth",
+        "/chat",
         "/onboarding",
         "/(auth)/login",
         "/(auth)/signup",
@@ -569,6 +592,9 @@ export const routeTree = rootRoute
     },
     "/auth": {
       "filePath": "auth.tsx"
+    },
+    "/chat": {
+      "filePath": "chat.tsx"
     },
     "/onboarding": {
       "filePath": "onboarding.tsx"
