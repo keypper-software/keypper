@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import api from "~/lib/api";
-import useEnvironmentStore from "~/stores/environment";
+import api from "@/lib/api";
+import useEnvironmentStore from "@/stores/environment";
 
 export default ({ workspaceSlug, projectSlug }) => {
   const { setEnvironment, setEnvironmentLoading } = useEnvironmentStore();

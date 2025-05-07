@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import api from "~/lib/api";
+import api from "@/lib/api";
 import { toast } from "sonner";
-import useEnvironmentStore from "~/stores/environment";
-import useSecretsStore, { RevealedSecret } from "~/stores/secrets";
+import useEnvironmentStore from "@/stores/environment";
+import useSecretsStore, { RevealedSecret } from "@/stores/secrets";
 
 export interface Secret {
   id: string;

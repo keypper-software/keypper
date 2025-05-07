@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Secret } from "~/hooks/useSecrets";
+import { Secret } from "@/hooks/useSecrets";
 
 export interface RevealedSecret {
   id: string;
