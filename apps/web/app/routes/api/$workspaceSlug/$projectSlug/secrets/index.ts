@@ -1,8 +1,8 @@
 import { json } from "@tanstack/react-start";
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createAPIFileRoute } from "@tanstack/start/api";
 import { nanoid } from "nanoid";
 import { db } from "~/db";
-import { secret, auditLog, secretVersion } from "~/db/schema";
+import { secret, auditLog, secretVersion, project } from "~/db/schema";
 import { auth } from "~/lib/auth";
 import { encrypt, decrypt } from "~/lib/crypto";
 import dotenv from "dotenv";
@@ -24,7 +24,7 @@ interface SecretRecord {
   value: string;
   branchId: string;
   addedBy: string;
-  version: string;
+  version: number;
 }
 
 async function createNewSecret(
@@ -38,15 +38,6 @@ async function createNewSecret(
     throw new Error("Secret key and value are required");
   }
 
-  const existingSecret = await db.query.secret.findFirst({
-    where: (s, { eq, and }) =>
-      and(eq(s.key, inputSecret.key), eq(s.branchId, branchId)),
-  });
-
-  const newVersion = existingSecret
-    ? parseInt(existingSecret.version.substring(1)) + 1
-    : 1;
-
   const newSecret = {
     id: nanoid(),
     createdAt: new Date(),
@@ -55,7 +46,7 @@ async function createNewSecret(
     value: encrypt(inputSecret.value, secretKey),
     branchId,
     addedBy: sessionUserId,
-    version: `v${newVersion}`,
+    version: 1,
   };
 
   await db.insert(secret).values(newSecret);
@@ -63,6 +54,7 @@ async function createNewSecret(
   await db.insert(secretVersion).values({
     id: nanoid(),
     secretId: newSecret.id,
+    key: newSecret.key,
     value: newSecret.value,
     createdAt: new Date(),
     version: newSecret.version,
@@ -140,7 +132,8 @@ export const APIRoute = createAPIFileRoute(
       }
 
       const secrets = await db.query.secret.findMany({
-        where: (s, { eq }) => eq(s.branchId, branch.id),
+        where: (s, { eq, and, isNull }) =>
+          and(eq(s.branchId, branch.id), isNull(s.deletedAt)),
       });
 
       const secretsCount = await db
@@ -187,7 +180,6 @@ export const APIRoute = createAPIFileRoute(
         secrets: SecretInput[];
       };
 
-      // Validate input
       if (
         !body.secrets ||
         !Array.isArray(body.secrets) ||
@@ -199,7 +191,6 @@ export const APIRoute = createAPIFileRoute(
         );
       }
 
-      // Validate each secret
       for (const secret of body.secrets) {
         if (!secret.key || !secret.value) {
           return json(
@@ -285,7 +276,6 @@ export const APIRoute = createAPIFileRoute(
         throw new Error("Encryption key is not configured");
       }
 
-      // Insert new secrets
       const newSecrets = body.secrets;
       await insertSecrets(
         newSecrets,
@@ -293,16 +283,6 @@ export const APIRoute = createAPIFileRoute(
         session.session.userId,
         secretKey
       );
-
-      // Create audit log entry
-      await db.insert(auditLog).values({
-        id: nanoid(),
-        action: "ADD_SECRET",
-        timestamp: new Date(),
-        userId: session.session.userId,
-        projectId: project.id,
-        details: `Added ${newSecrets.length} new secrets to branch ${branch.name} in environment ${environment.name}`,
-      });
 
       return json(
         {
@@ -326,4 +306,79 @@ export const APIRoute = createAPIFileRoute(
       );
     }
   },
+
+  PUT: async ({ request, params }) => {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      return json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = (await request.json()) as {
+      secrets: SecretUpdate[];
+    };
+
+    const deleteSecret = async (secretData: SecretUpdate) => {
+      await db
+        .update(secret)
+        .set({ deletedAt: new Date() })
+        .where(eq(secret.id, secretData.id));
+    };
+
+    const updateSecret = async (secretData: SecretUpdate) => {
+      const secretKey = process.env.ENCRYPTION_KEY;
+      if (!secretKey) {
+        throw new Error("Encryption key is not configured");
+      }
+
+      const existingSecret = await db.query.secret.findFirst({
+        where: (s, { eq }) => eq(s.id, secretData.id),
+      });
+
+      if (!existingSecret) {
+        return json({ message: "Secret not found" }, { status: 404 });
+      }
+
+      await db
+        .update(secret)
+        .set({
+          key: secretData.key || existingSecret.key,
+          value: secretData.value
+            ? encrypt(secretData.value, secretKey)
+            : existingSecret.value,
+          version: existingSecret.version + 1,
+        })
+        .where(eq(secret.id, secretData.id));
+
+      await db.insert(secretVersion).values({
+        id: nanoid(),
+        secretId: existingSecret.id,
+        key: secretData.key || existingSecret.key,
+        value: secretData.value
+          ? encrypt(secretData.value, secretKey)
+          : existingSecret.value,
+        createdAt: new Date(),
+        version: existingSecret.version + 1,
+      });
+    };
+
+    for (const secret of body.secrets) {
+      if (secret.shouldDelete) {
+        deleteSecret(secret);
+      } else {
+        updateSecret(secret);
+      }
+    }
+    return json({}, { status: 200 });
+  },
 });
+
+interface SecretUpdate {
+  id: string;
+  environment: string;
+  key: string;
+  value: string;
+  shouldDelete: boolean;
+}

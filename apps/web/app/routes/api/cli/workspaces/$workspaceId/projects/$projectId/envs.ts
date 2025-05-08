@@ -1,5 +1,5 @@
 import { json } from "@tanstack/react-start";
-import { createAPIFileRoute } from "@tanstack/react-start/api";
+import { createAPIFileRoute } from "@tanstack/start/api";
 import { db } from "~/db";
 import { eq } from "drizzle-orm";
 import { environment, project, authToken } from "~/db/schema";

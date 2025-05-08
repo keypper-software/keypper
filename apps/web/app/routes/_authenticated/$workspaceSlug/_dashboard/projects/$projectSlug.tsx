@@ -16,6 +16,7 @@ import {
 import cn from "classnames";
 import api from "~/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export const Route = createFileRoute(
   "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug"
@@ -58,6 +59,8 @@ function RouteComponent() {
     queryFn: () => api.get(`/api/${workspaceSlug}/${projectSlug}`),
   });
 
+  const [activeTab, setActiveTab] = useState(router.latestLocation.pathname);
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -80,10 +83,15 @@ function RouteComponent() {
             <div
               className={cn(
                 "flex items-center py-1 px-3 gap-2 font-medium text-sm cursor-pointer hover:bg-white/10 transition-all duration-300 rounded-md",
-                router.latestLocation.pathname ===
+                activeTab ===
                   `/${workspaceSlug}/projects/${projectSlug}${tab.href}` &&
                   "text-accent bg-accent/10"
               )}
+              onClick={() =>
+                setActiveTab(
+                  `/${workspaceSlug}/projects/${projectSlug}${tab.href}`
+                )
+              }
             >
               <tab.icon size={16} iconStyle="Bold" />
               <span>{tab.label}</span>
