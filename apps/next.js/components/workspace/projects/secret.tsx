@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/api";
-import { useParams } from "@tanstack/react-router";
 import useSecretsStore, { RevealedSecret } from "@/stores/secrets";
 import { useSecrets } from "@/hooks/useSecrets";
 import { useState } from "react";

@@ -13,45 +13,36 @@ import { useUser } from "@/context/user-context";
 import { environment } from "@/db/schema";
 import useEnvironments from "@/hooks/useEnvironments";
 import { useSecrets } from "@/hooks/useSecrets";
+import useEnvironmentStore from "@/stores/environment";
 import React, { useEffect, useState } from "react";
 
 const Page = () => {
   const { currentWorkspace, projectSlug } = useUser();
-  const { environments } = useEnvironments({
-    projectSlug: projectSlug!,
-    workspaceSlug: currentWorkspace.slug,
-  });
-
-  const {
-    secrets,
-    secretsLoading,
-  } = useSecrets(currentWorkspace.name, projectSlug!);
-
-  const [selectedEnvironment, setSelectedEnvironment] = useState(
-    environments?.[0].name!
+  const { environment, environments, setEnvironment } = useEnvironmentStore();
+  const { secrets, secretsLoading, mutate } = useSecrets(
+    currentWorkspace.name,
+    projectSlug!
   );
-
   useEffect(() => {
-    setSelectedEnvironment(environments?.[0].name!);
-  }, [environments]);
+    mutate();
+  }, [environment]);
+  console.log(secrets);
   return (
     <div>
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-x-6">
           <Select
             onValueChange={(value) => {
-              setSelectedEnvironment(value);
+              setEnvironment(value);
             }}
-            value={selectedEnvironment}
+            value={environment}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue
-              // defaultValue={environment}
-              />
+            <SelectTrigger className="w-[180px] border-white/10">
+              <SelectValue defaultValue={environment} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="border-white/10">
               {environments?.map((environment) => (
-                <SelectItem value={environment.name}>
+                <SelectItem key={environment.id} value={environment.name}>
                   {environment.name}
                 </SelectItem>
               ))}

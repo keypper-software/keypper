@@ -32,7 +32,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     mutationFn: async () => {
       if (!environment) return { secrets: [] };
       const response = await api.get(
-        `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`
+        `/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`
       );
 
       const data = response.data.secrets as Secret[];

@@ -27,7 +27,7 @@ export default function Home() {
   };
 
   const dashboardLink = (
-    !!currentWorkspace ? `/${currentWorkspace.slug}` : "/onboarding"
+    !!currentWorkspace ? `/${currentWorkspace?.slug}` : "/onboarding"
   ) as AppRoute;
 
   return (

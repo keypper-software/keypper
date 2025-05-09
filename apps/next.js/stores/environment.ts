@@ -1,5 +1,6 @@
 import { Environment } from "@/lib/apis/environment";
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface EnvironmentStore {
   environment: string;
@@ -10,7 +11,7 @@ interface EnvironmentStore {
   setEnvironments: (environments: Environment[]) => void;
 }
 
-const useEnvironmentStore = create<EnvironmentStore>((set) => ({
+const useEnvironmentStore = create<EnvironmentStore>()((set) => ({
   environment: "",
   environmentsLoading: false,
   environments: [],

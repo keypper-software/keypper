@@ -7,10 +7,13 @@ import { Textarea } from "@/components/interface/textarea";
 import Header from "@/components/workspace/header";
 import ProjectCard from "@/components/workspace/projects/project-card";
 import { useUser } from "@/context/user-context";
-import { getProjectsFn } from "@/lib/apis/projects";
-import { useQuery } from "@tanstack/react-query";
+import { createProjectsFn, getProjectsFn } from "@/lib/apis/projects";
+import { queryClient } from "@/providers/query-client-provider";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import React, { useState } from "react";
+import { PacmanLoader } from "react-spinners";
+import { toast } from "sonner";
 
 const Page = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,8 +30,12 @@ const Page = () => {
   const allProjects = projects.data?.data || [];
 
   const renderLogic = () => {
-    if (projects.isLoading) {
-      return <div className="">Projects loading</div>;
+    if (projects.isLoading || projects.isRefetching) {
+      return (
+        <div className="w-full h-[40vh] flex justify-center items-center">
+          <PacmanLoader color="#0edbbd" size={20} />
+        </div>
+      );
     }
 
     if (projects.isError) {
@@ -48,19 +55,21 @@ const Page = () => {
       );
     }
 
-    if (allProjects.length == 0) {
+    if (allProjects?.length == 0) {
+    return(
       <IsEmpty
-        title="No Projects Available"
-        info="You have to create a new porject or get invited to one."
+      title="No Projects Available"
+      info="You have to create a new porject or get invited to one."
+    >
+      <Button
+        className="flex my-2 items-center text-sm cursor-pointer gap-2 px-4"
+        onClick={() => setIsOpen(true)}
       >
-        <Button
-          className="flex my-2 items-center text-sm cursor-pointer gap-2 px-4"
-          onClick={() => setIsOpen(true)}
-        >
-          <Plus size={16} />
-          Create Project
-        </Button>
-      </IsEmpty>;
+        <Plus size={16} />
+        Create Project
+      </Button>
+    </IsEmpty>
+    )
     }
 
     return (
@@ -75,6 +84,19 @@ const Page = () => {
       </div>
     );
   };
+
+  const createProject = useMutation({
+    mutationFn: createProjectsFn,
+    mutationKey: ["create-project", currentWorkspace.slug],
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      projects.refetch();
+      setIsOpen(false);
+      setProjectDescription("");
+      setProjectName("");
+      toast.success("Project created");
+    },
+  });
 
   return (
     <div>
@@ -95,7 +117,7 @@ const Page = () => {
         title="Create Project"
         description="Create a new project to manage your secrets across Development, Staging and Production environments."
         isOpen={isOpen}
-        onClose={() => !isLoading && setIsOpen(false)}
+        onClose={() => !createProject.isPending && setIsOpen(false)}
         size="md"
       >
         <div className="space-y-6 py-2">
@@ -157,7 +179,24 @@ const Page = () => {
           </div>
 
           <div className="flex items-center justify-end gap-3 pt-2">
-            {/*  */}
+            <Button
+              onClick={() => {
+                createProject.mutate({
+                  data: {
+                    name: projectName,
+                    description: projectDescription,
+                  },
+                  workspaceSlug: currentWorkspace.slug,
+                });
+              }}
+              disabled={
+                !projectName.trim() ||
+                !projectDescription.trim() ||
+                createProject.isPending
+              }
+            >
+              {createProject.isPending ? "Creating..." : "Create Project"}
+            </Button>
           </div>
         </div>
       </Modal>

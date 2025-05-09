@@ -9,3 +9,18 @@ export interface Project extends Workspace {
 export const getProjectsFn = ({ workspaceSlug }: { workspaceSlug: string }) => {
   return api.get<Project[]>(`/${workspaceSlug}/projects`);
 };
+
+interface createProjectParams {
+  name: string;
+  description?: string;
+}
+
+export const createProjectsFn = ({
+  workspaceSlug,
+  data,
+}: {
+  workspaceSlug: string;
+  data: createProjectParams;
+}) => {
+  return api.post<Project>(`/${workspaceSlug}/projects`, data);
+};

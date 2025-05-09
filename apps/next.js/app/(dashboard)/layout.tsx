@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import Chat from "@/components/ai/chat";
 import Sidebar from "@/components/workspace/sidebar";
 
 type Props = {
@@ -12,7 +11,7 @@ const Layout = (props: Props) => {
       <Sidebar />
       <div className="p-5 pl-0 flex-1 h-full">
         <div className="py-5 px-10 bg-[#121214] rounded-2xl border border-white/5 w-full h-full overflow-y-auto">
-          <Chat />
+          {/* <Chat /> */}
           {props.children}
         </div>
       </div>
