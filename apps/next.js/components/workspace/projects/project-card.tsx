@@ -1,18 +1,17 @@
-import { Link } from "@tanstack/react-router";
+// import { Link } from "@tanstack/react-router";
+// import { Project } from "@/interfaces";
 import { FC } from "react";
-import { Project } from "@/interfaces";
-import { useWorkspaceStore } from "@/stores/workspace";
 import moment from "moment";
+import { AppRoute, Link } from "@/components/interface/link";
+import { Project } from "@/lib/apis/projects";
 
-const ProjectCard: FC<{ project: Project }> = ({ project }) => {
-  const { currentWorkspace } = useWorkspaceStore();
+const ProjectCard: FC<{ project: Project; link: string }> = ({
+  project,
+  link,
+}) => {
   return (
     <Link
-      to="/$workspaceSlug/projects/$projectSlug"
-      params={{
-        projectSlug: project.slug,
-        workspaceSlug: currentWorkspace?.slug!,
-      }}
+      to={link as AppRoute}
       className="flex flex-col justify-between p-4 border border-gray-001 hover:bg-gray-001/10 hover:border-accent rounded-2xl h-36"
     >
       <div className="">

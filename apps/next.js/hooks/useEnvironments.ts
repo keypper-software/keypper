@@ -1,29 +1,36 @@
+"use client";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import api from "@/lib/api";
 import useEnvironmentStore from "@/stores/environment";
+import { getEnvironmentsFn } from "@/lib/apis/environment";
 
-export default ({ workspaceSlug, projectSlug }) => {
-  const { setEnvironment, setEnvironmentLoading } = useEnvironmentStore();
+export default ({
+  workspaceSlug,
+  projectSlug,
+}: {
+  workspaceSlug: string;
+  projectSlug: string;
+}) => {
+  const { setEnvironment, setEnvironmentLoading, setEnvironments } =
+    useEnvironmentStore();
 
   const { data: environmentsData, isLoading: environmentsLoading } = useQuery({
     queryKey: ["environments", workspaceSlug, projectSlug],
-    queryFn: async () => {
-      const response = await api.get(`/api/${workspaceSlug}/${projectSlug}`);
-      return response.data;
-    },
+    queryFn: () => getEnvironmentsFn({ projectSlug, workspaceSlug }),
   });
 
   useEffect(() => {
-    if (!setEnvironmentLoading && environmentsData?.environments) {
-      setEnvironment(environmentsData?.environments[0].name);
+    if (!setEnvironmentLoading && environmentsData?.data.environments) {
+      setEnvironment(environmentsData?.data.environments[0].name);
+      setEnvironments(environmentsData?.data.environments);
     }
     setEnvironmentLoading(environmentsLoading);
   }, [environmentsData, setEnvironmentLoading]);
 
   return {
     loading: environmentsLoading,
-    environments: environmentsData,
-    initialEnv: environmentsData?.environments[0].name,
+    environments: environmentsData?.data.environments,
+    initialEnv: environmentsData?.data.environments[0].name,
   };
 };

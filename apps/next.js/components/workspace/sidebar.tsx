@@ -1,7 +1,7 @@
+"use client";
 import React, { use, useEffect, useState } from "react";
 import Dropdown from "@/components/interface/dropdown";
-import { ChevronDown, ChevronsDown, LogOut } from "lucide-react";
-import { Link, useRouter } from "@tanstack/react-router";
+import { ChevronDown, ChevronLeft, ChevronsDown, LogOut } from "lucide-react";
 import {
   Rocket,
   FolderWithFiles,
@@ -17,22 +17,24 @@ import { Button } from "../interface/button";
 import { auth } from "@/lib/auth";
 import { authClient } from "@/lib/auth-client";
 import axios from "axios";
+import { Link } from "../interface/link";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { currentWorkspace, workspaces, setCurrentWorkspace, setWorkspaces } =
-    useWorkspaceStore();
+  // const { currentWorkspace, workspaces, setCurrentWorkspace, setWorkspaces } =
+  //   useWorkspaceStore();
 
-  useEffect(() => {
-    const fetchWorkspaces = async () => {
-      const { data } = await axios.get("/api/workspaces");
-      setWorkspaces(data);
-      setCurrentWorkspace(data[0]);
-    };
-    fetchWorkspaces();
-  }, []);
-  const workspaceSlug = currentWorkspace?.slug!;
+  // useEffect(() => {
+  //   const fetchWorkspaces = async () => {
+  //     const { data } = await axios.get("/api/workspaces");
+  //     setWorkspaces(data);
+  //     setCurrentWorkspace(data[0]);
+  //   };
+  //   fetchWorkspaces();
+  // }, []);
+  // const workspaceSlug = currentWorkspace?.slug!;
 
   const links = [
     {
@@ -73,56 +75,99 @@ const Sidebar = () => {
   ];
 
   const router = useRouter();
-
-  const [activeRoute, setActiveRoute] = useState(
-    router.latestLocation.pathname
-  );
+  const pathname = usePathname();
+  const [activeRoute, setActiveRoute] = useState(pathname);
 
   const handleLogout = async () => {
     await authClient.signOut();
-    router.navigate({ to: "/" });
+    router.replace("/");
   };
-
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { workspaceSlug } = useParams();
   return (
-    <div className="w-56 h-screen p-5 relative">
-      <img src="/logo/icon.png" alt="Keypper" className="w-[30px]" />
-      <div className="mt-5 space-y-1">
-        {links.map((link, index) => (
-          <Link
-            key={index}
-            // @ts-ignore
-            to={`/$workspaceSlug${link.href}`}
-            params={{ workspaceSlug: workspaceSlug }}
-            className="flex items-center gap-2 p-2 cursor-pointer hover:bg-white/10 transition-all duration-300 rounded-md text-[#6D6F7E] hover:text-white/90"
-            onClick={() => setActiveRoute(`/${workspaceSlug}${link.href}`)}
+    <div
+      className={cn(
+        "h-screen p-5 relative flex flex-col justify-between",
+        isCollapsed ? "w-max" : "w-56"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="">
+          {isCollapsed ? (
+            <div className="">
+              {/* <img src="/logo/icon.png" alt="Keypper" className="w-[30px]" /> */}
+            </div>
+          ) : (
+            <div className="">
+              <img
+                src="/logo/wordmark.png"
+                alt="Keypper"
+                className="w-[120px]"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="">
+          <Button
+            className="my-0"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            variant="ghost"
           >
-            <link.icon
-              size={16}
-              iconStyle="BoldDuotone"
-              color={
-                activeRoute.startsWith(`/${workspaceSlug}${link.href}`)
-                  ? "#0edbbd"
-                  : ""
-              }
-            />
-            <p
-              className={cn(
-                "text-sm",
-                activeRoute.startsWith(`/${workspaceSlug}${link.href}`) &&
-                  "text-accent"
-              )}
-            >
-              {link.name}
-            </p>
-          </Link>
-        ))}
+            <ChevronLeft size={20} />
+          </Button>
+        </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-5 w-full">
+      {/*  */}
+
+      <div className="mt-5 flex-1 space-y-1">
+        {links.map((link, index) => {
+          return (
+            <Link
+              key={index}
+              // @ts-ignore
+              to={`/$workspaceSlug${link.href}`}
+              params={{ workspaceSlug: workspaceSlug + "" }}
+              className="flex items-center gap-2 p-2 cursor-pointer hover:bg-white/10 transition-all duration-300 rounded-md text-[#6D6F7E] hover:text-white/90"
+              onClick={() => setActiveRoute(`/${workspaceSlug}${link.href}`)}
+            >
+              {/* @ts-ignore */}
+              <link.icon
+                size={isCollapsed ? 20 : 16}
+                iconStyle="BoldDuotone"
+                color={
+                  activeRoute.startsWith(`/${workspaceSlug}${link.href}`)
+                    ? "#0edbbd"
+                    : ""
+                }
+              />
+              {!isCollapsed && (
+                <p
+                  className={cn(
+                    "text-sm",
+                    activeRoute.startsWith(`/${workspaceSlug}${link.href}`) &&
+                      "text-accent"
+                  )}
+                >
+                  {link.name}
+                </p>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/*  */}
+    {
+      !isCollapsed && (
+        <div className="w-full">
         <button className="flex items-center justify-between gap-2 p-2 cursor-pointer w-full hover:bg-white/10 transition-all duration-300 rounded-md text-[#6D6F7E] hover:text-white/90">
-          <span className="text-sm">{currentWorkspace?.name}</span>{" "}
+          <span className="text-sm">{workspaceSlug}</span>
           <ChevronDown size={16} />
         </button>
       </div>
+      )
+    }
     </div>
   );
 };
