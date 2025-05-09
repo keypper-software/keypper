@@ -1,9 +1,8 @@
 "use client";
 import { Button } from "@/components/interface/button";
-import DashboardSkeleton from "@/components/interface/skeletons/dashboard-skeleton";
 import { getWorkspacesFn, Workspace } from "@/lib/apis/workspace";
 import { useQuery } from "@tanstack/react-query";
-import { AxiosError, isAxiosError } from "axios";
+import { isAxiosError } from "axios";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   createContext,

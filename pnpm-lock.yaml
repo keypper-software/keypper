@@ -173,6 +173,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.0
         version: 1.2.4(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@repo/db-schema':
+        specifier: workspace:*
+        version: link:../../packages/db-schema
       '@tanstack/react-query':
         specifier: ^5.71.10
         version: 5.74.4(react@19.1.0)
@@ -454,6 +457,8 @@ importers:
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.8.3)(vite@6.3.3(@types/node@22.15.2)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))
+
+  packages/db-schema: {}
 
   packages/eslint-config:
     devDependencies:
