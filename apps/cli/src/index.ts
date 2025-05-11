@@ -29,6 +29,7 @@ cli
 cli
   .command("run")
   .description("Run a command in the context of your Keypper workspace")
+  .option("-c, --no-cache", "Do not use cache", true)
   .option(
     "-i, --ignore",
     "Ignore errors or warnings related to keypper (optional value)",
