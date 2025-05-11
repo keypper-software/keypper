@@ -18,9 +18,16 @@ export default function SecretsList({ secrets, isLoading }: SecretsListProps) {
 
   return (
     <div className="flex flex-col gap-7 secrets-list">
-      {secrets.map((secret) => (
+      {
+        secrets.length ==0&&(
+          <div className="p-12 text-sm">
+            <div className="text-center">No secrets</div>
+          </div>
+        )
+      }
+      {secrets.map((secret, index) => (
         <div className="">
-          <Secret key={secret.id} secret={secret} />
+          <Secret key={index} secret={secret} />
         </div>
       ))}
     </div>

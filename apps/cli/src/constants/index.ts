@@ -6,4 +6,4 @@ export const TEMP_PATH = path.join(STORAGE_PATH, "temp");
 
 export const VERSION = "0.0.0";
 export const AUTH_UPDATE_INTERVAL = 5000;
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL = "http://localhost:5678";

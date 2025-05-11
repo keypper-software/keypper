@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import useEnvironmentStore from "@/stores/environment";
-import useSecretsStore, { RevealedSecret } from "@/stores/secrets";
+import useSecretsStore from "@/stores/secrets";
 
 export interface Secret {
   id: string;
@@ -33,7 +32,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     mutationFn: async () => {
       if (!environment) return { secrets: [] };
       const response = await api.get(
-        `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`
+        `/${workspaceSlug}/${projectSlug}/secrets?environment=${environment}`
       );
 
       const data = response.data.secrets as Secret[];
@@ -105,12 +104,12 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
         changeCount++;
       }
 
-      // if (
-      //   secret.newValue !== undefined &&
-      //   secret.newValue !== secret.originalValue
-      // ) {
-      //   changeCount++;
-      // }
+      if (
+        secret.newValue !== undefined &&
+        secret.newValue !== secret.originalValue
+      ) {
+        changeCount++;
+      }
 
       return count + changeCount;
     }, 0);
@@ -119,7 +118,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   const getOriginalValue = async (key: string, id: string) => {
     try {
       const response = await api.get(
-        `/api/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
+        `/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
       );
       const revealedValue = response.data.value;
       const newSecret = secrets.map((secret) => {

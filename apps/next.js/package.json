@@ -14,9 +14,7 @@
     "db:sync": "pnpm db:push && pnpm db:generate"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.1",
+    "@repo/db-schema": "workspace:*",
     "@ai-sdk/google": "^1.2.14",
     "@ai-sdk/react": "^1.2.11",
     "@radix-ui/react-dialog": "^1.1.7",
@@ -39,8 +37,12 @@
     "moment": "^2.30.1",
     "motion": "^11.16.0",
     "nanoid": "^5.0.9",
+    "next": "15.3.1",
     "pg": "^8.13.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
+    "react-spinners": "^0.17.0",
     "rehype-prism-plus": "^2.0.0",
     "solar-icon-set": "^1.0.0",
     "sonner": "^2.0.1",
@@ -51,18 +53,18 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "@iconify/react": "^5.2.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
     "@types/pg": "^8.11.10",
     "@types/prismjs": "^1.26.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.30.1",
-    "postcss": "^8.4.49"
+    "postcss": "^8.4.49",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

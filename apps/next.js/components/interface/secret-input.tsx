@@ -116,7 +116,7 @@ export const SecretInput = React.forwardRef<HTMLInputElement, SecretInputProps>(
               </div>
             </TooltipTrigger>
             {value && !isMarkedAsDeleted && (
-              <TooltipContent side="top" align="start">
+              <TooltipContent className="bg-transparent" side="top" align="start">
                 <Button variant="outline">Copy</Button>
               </TooltipContent>
             )}

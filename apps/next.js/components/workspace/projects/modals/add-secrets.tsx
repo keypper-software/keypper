@@ -16,6 +16,7 @@ import api from "@/lib/api";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSecrets } from "@/hooks/useSecrets";
+import { useUser } from "@/context/user-context";
 
 interface Secret {
   index: number;
@@ -24,20 +25,17 @@ interface Secret {
 }
 
 interface AddSecretsDialogProps {
-  workspaceSlug: string;
-  projectSlug: string;
   selectedEnvironment: string;
 }
 
 const initialSecret = [{ key: "", value: "", index: 0 }];
 export default function AddSecretsDialog({
-  workspaceSlug,
-  projectSlug,
   selectedEnvironment,
 }: AddSecretsDialogProps) {
+  const { projectSlug, workspaceSlug } = useUser();
   const { secretsLoading, mutateAsync } = useSecrets(
-    workspaceSlug,
-    projectSlug
+    String(workspaceSlug),
+    String(projectSlug)
   );
   const [newSecrets, setNewSecrets] = useState<Secret[]>(initialSecret);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -153,7 +151,7 @@ export default function AddSecretsDialog({
       }
 
       await api.post(
-        `/api/${workspaceSlug}/${projectSlug}/secrets?environment=${selectedEnvironment}`,
+        `/${workspaceSlug}/${projectSlug}/secrets?environment=${selectedEnvironment}`,
         { secrets: validSecrets }
       );
 
@@ -201,13 +199,14 @@ export default function AddSecretsDialog({
           <Plus size={16} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl border-white/5">
         <DialogHeader>
           <DialogTitle>Add Secrets</DialogTitle>
           <DialogDescription>
             Enter secrets key and value or paste .env content.
           </DialogDescription>
         </DialogHeader>
+
         <div className="flex flex-col gap-y-4">
           <div className="space-y-2">
             <div className="max-h-[300px] overflow-y-auto space-y-2">
@@ -265,6 +264,7 @@ export default function AddSecretsDialog({
             </div>
           </div>
         </div>
+
         <DialogFooter className="sm:justify-start mt-6 flex items-center gap-x-3">
           <Button
             onClick={handleAddSecrets}
