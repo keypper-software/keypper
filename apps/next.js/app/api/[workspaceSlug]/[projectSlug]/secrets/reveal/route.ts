@@ -100,14 +100,14 @@ export async function GET(
     // Decrypt the secret value
     const decryptedValue = decrypt(secretRecord.value, encryptionKey);
 
-    await db.insert(auditLog).values({
-      id: nanoid(),
-      action: "REVEAL_SECRET",
-      projectId: project.id,
-      timestamp: new Date(),
-      userId: session.user.id,
-      details: `Revealed secret ${secretRecord.key}`,
-    });
+    // await db.insert(auditLog).values({
+    //   id: nanoid(),
+    //   action: "REVEAL_SECRET",
+    //   projectId: project.id,
+    //   timestamp: new Date(),
+    //   userId: session.user.id,
+    //   details: `Revealed secret ${secretRecord.key}`,
+    // });
 
     // Return the decrypted secret value
     return NextResponse.json({
