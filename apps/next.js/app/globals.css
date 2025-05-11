@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css?family=Geist:100,200,300,regular,500,600,700,800,900);
 @import "tailwindcss";
 
 :root {
@@ -29,7 +30,6 @@
 *::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.3);
 }
-
 
 @theme inline {
   --color-background: var(--background);
@@ -65,5 +65,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Geist", sans-serif;
 }
