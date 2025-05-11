@@ -1,0 +1,69 @@
+@import url(https://fonts.googleapis.com/css?family=Geist:100,200,300,regular,500,600,700,800,900);
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Apply to all scrollable elements globally */
+* {
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.4) transparent;
+}
+
+/* WebKit-based browsers (Chrome, Edge, Safari) */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@theme {
+  --color-black-001: #161618;
+  --color-black-bg: #0d0c0e;
+  --color-background: #161618;
+  --color-foreground: #f5f5f5;
+  --color-muted-foreground: #999999;
+  --color-accent: #0edbbd;
+  --color-card-bg: #121214;
+  --color-gray-001: #383a42;
+  --color-gray-002: #17181a;
+  --color-card: #161618;
+  --color-card-foreground: #f5f5f5;
+  --color-popover: #161618;
+  --color-popover-foreground: #f5f5f5;
+  --color-primary: #0edbbd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Geist", sans-serif;
+}
