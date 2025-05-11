@@ -14,15 +14,18 @@ import { useSecrets } from "@/hooks/useSecrets";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
+import { useUser } from "@/context/user-context";
 
 interface SecretProps {
   secret: RevealedSecret;
 }
 
 const Secret = ({ secret }: SecretProps) => {
-  const { projectSlug, workspaceSlug } = useParams({
-    from: "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/",
-  });
+  // const { projectSlug, workspaceSlug } = useParams({
+  //   from: "/_authenticated/$workspaceSlug/_dashboard/projects/$projectSlug/",
+  // });
+
+  const { projectSlug, workspaceSlug } = useUser();
 
   const [loading, setLoading] = useState(false);
   const [hideValue, setHideValue] = useState(true);
@@ -33,7 +36,7 @@ const Secret = ({ secret }: SecretProps) => {
     rawSecrets,
     handleDeleteSecret,
     undoDeleteSecret,
-  } = useSecrets(workspaceSlug, projectSlug);
+  } = useSecrets(String(workspaceSlug), String(projectSlug));
   const { setSecrets } = useSecretsStore();
 
   const fetchSecret = async () => {

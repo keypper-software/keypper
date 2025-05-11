@@ -10,23 +10,21 @@ import {
 import AddSecretsDialog from "@/components/workspace/projects/modals/add-secrets";
 import SecretsList from "@/components/workspace/projects/secrets-list";
 import { useUser } from "@/context/user-context";
-import { environment } from "@/db/schema";
-import useEnvironments from "@/hooks/useEnvironments";
 import { useSecrets } from "@/hooks/useSecrets";
 import useEnvironmentStore from "@/stores/environment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 const Page = () => {
   const { currentWorkspace, projectSlug } = useUser();
   const { environment, environments, setEnvironment } = useEnvironmentStore();
-  const { secrets, secretsLoading, mutate } = useSecrets(
+  const { secrets, secretsLoading, mutate, getChangesCount } = useSecrets(
     currentWorkspace.name,
     projectSlug!
   );
   useEffect(() => {
     mutate();
   }, [environment]);
-  console.log(secrets);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-10">
@@ -48,34 +46,32 @@ const Page = () => {
               ))}
             </SelectContent>
           </Select>
-          {/* {secrets?.length > 0 && (
+          {secrets?.length > 0 && (
             <p className="text-sm">{secrets?.length} secrets</p>
-          )} */}
+          )}
         </div>
 
         <div className="flex items-center gap-x-2">
-          {/* {noOfChanges > 0 && (
+          {getChangesCount() > 0 && (
             <span className="text-sm text-yellow-500">
-              {noOfChanges} unsaved changes
+              {getChangesCount()} unsaved changes
             </span>
-          )} */}
+          )}
 
-          <Button
-          // disabled={!noOfChanges}
-          // onClick={handleSaveChanges}
-          // isLoading={saveChangesLoading}
-          >
-            Save Changes
-          </Button>
-          {/* <AddSecretsDialog
-            workspaceSlug={workspaceSlug}
-            projectSlug={projectSlug}
-            selectedEnvironment={environment}
-          /> */}
+          <div className="flex gap-3">
+            <Button
+            // disabled={!noOfChanges}
+            // onClick={handleSaveChanges}
+            // isLoading={saveChangesLoading}
+            >
+              Save Changes
+            </Button>
+          </div>
+          <AddSecretsDialog selectedEnvironment={environment} />
         </div>
       </div>
 
-      {/* <SecretsList secrets={secrets} isLoading={secretsLoading} /> */}
+      <SecretsList secrets={secrets} isLoading={secretsLoading} />
     </div>
   );
 };

@@ -70,11 +70,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
       return setCurrentWorkspace(allWorkspaces[0]);
     }
+
     setCurrentWorkspace({
       id: Math.random().toString(36),
       slug: "/onboarding",
       name: "onboarding",
     });
+
   }, [workspaces.data, allWorkspaces, workspaceSlug, pathname]);
 
   if (!isIgnored && workspaces.isLoading) {
@@ -187,8 +189,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         success: workspaces.isSuccess,
         workspaces: allWorkspaces,
         currentWorkspace: currentWorkspace,
-        projectSlug: projectSlug as string,
-        workspaceSlug: workspaceSlug as string,
+        projectSlug: String(projectSlug),
+        workspaceSlug: String(workspaceSlug),
       }}
     >
       {children}

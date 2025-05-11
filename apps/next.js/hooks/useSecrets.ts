@@ -104,12 +104,12 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
         changeCount++;
       }
 
-      // if (
-      //   secret.newValue !== undefined &&
-      //   secret.newValue !== secret.originalValue
-      // ) {
-      //   changeCount++;
-      // }
+      if (
+        secret.newValue !== undefined &&
+        secret.newValue !== secret.originalValue
+      ) {
+        changeCount++;
+      }
 
       return count + changeCount;
     }, 0);
@@ -118,7 +118,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
   const getOriginalValue = async (key: string, id: string) => {
     try {
       const response = await api.get(
-        `/api/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
+        `/${workspaceSlug}/${projectSlug}/secrets/reveal?key=${key}&environment=${environment}`
       );
       const revealedValue = response.data.value;
       const newSecret = secrets.map((secret) => {
