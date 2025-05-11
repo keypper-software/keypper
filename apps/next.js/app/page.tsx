@@ -20,14 +20,14 @@ export default function Home() {
     },
   ];
 
-  const { currentWorkspace, success } = useUser();
+  const { currentWorkspace, success, workspaces } = useUser();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const dashboardLink = (
-    !!currentWorkspace ? `/${currentWorkspace?.slug}` : "/onboarding"
+    !!workspaces.length ? `/${workspaces[0]?.slug}` : "/onboarding"
   ) as AppRoute;
 
   return (
