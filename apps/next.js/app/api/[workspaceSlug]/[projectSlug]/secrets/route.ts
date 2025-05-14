@@ -401,7 +401,12 @@ export async function PUT(
       updateSecret(secret);
     }
   }
-  return NextResponse.json({}, { status: 200 });
+  return NextResponse.json(
+    {
+      message: "Secrets updated successfully",
+    },
+    { status: 200 }
+  );
 }
 
 interface SecretUpdate {
