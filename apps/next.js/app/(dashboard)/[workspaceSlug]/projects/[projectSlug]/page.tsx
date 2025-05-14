@@ -11,19 +11,42 @@ import AddSecretsDialog from "@/components/workspace/projects/modals/add-secrets
 import SecretsList from "@/components/workspace/projects/secrets-list";
 import { useUser } from "@/context/user-context";
 import { useSecrets } from "@/hooks/useSecrets";
+import api from "@/lib/api";
 import useEnvironmentStore from "@/stores/environment";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const Page = () => {
   const { currentWorkspace, projectSlug } = useUser();
   const { environment, environments, setEnvironment } = useEnvironmentStore();
-  const { secrets, secretsLoading, mutate, getChangesCount } = useSecrets(
-    currentWorkspace.name,
-    projectSlug!
-  );
+  const [saveChangesLoading, setSaveChangesLoading] = useState(false);
+
+  const { secrets, secretsLoading, mutate, getChangesCount, saveChanges } =
+    useSecrets(currentWorkspace.name, projectSlug!);
+
   useEffect(() => {
     mutate();
   }, [environment]);
+
+  const workspaceSlug = currentWorkspace.slug;
+
+  const handleSaveChanges = async () => {
+    try {
+      setSaveChangesLoading(true);
+      const changes = saveChanges();
+
+      await api.put(`/${workspaceSlug}/${projectSlug}/secrets`, {
+        secrets: changes,
+      });
+
+      toast.success("Changes saved successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save changes");
+    } finally {
+      setSaveChangesLoading(false);
+    }
+  };
 
   return (
     <div>
@@ -60,9 +83,9 @@ const Page = () => {
 
           <div className="flex gap-3">
             <Button
-            // disabled={!noOfChanges}
-            // onClick={handleSaveChanges}
-            // isLoading={saveChangesLoading}
+              // disabled={!noOfChanges}
+              onClick={handleSaveChanges}
+              // isLoading={saveChangesLoading}
             >
               Save Changes
             </Button>
