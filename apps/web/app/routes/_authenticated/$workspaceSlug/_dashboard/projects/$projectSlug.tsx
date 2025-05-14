@@ -93,6 +93,7 @@ function RouteComponent() {
                 )
               }
             >
+              {/* @ts-ignore */}
               <tab.icon size={16} iconStyle="Bold" />
               <span>{tab.label}</span>
             </div>
