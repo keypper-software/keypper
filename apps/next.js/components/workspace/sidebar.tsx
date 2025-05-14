@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { motion, useAnimate } from "motion/react";
+
 import {
   Rocket,
   FolderWithFiles,
