@@ -56,20 +56,20 @@ const Page = () => {
     }
 
     if (allProjects?.length == 0) {
-    return(
-      <IsEmpty
-      title="No Projects Available"
-      info="You have to create a new porject or get invited to one."
-    >
-      <Button
-        className="flex my-2 items-center text-sm cursor-pointer gap-2 px-4"
-        onClick={() => setIsOpen(true)}
-      >
-        <Plus size={16} />
-        Create Project
-      </Button>
-    </IsEmpty>
-    )
+      return (
+        <IsEmpty
+          title="No Projects Available"
+          info="You have to create a new porject or get invited to one."
+        >
+          <Button
+            className="flex my-2 items-center text-sm cursor-pointer gap-2 px-4"
+            onClick={() => setIsOpen(true)}
+          >
+            <Plus size={16} />
+            Create Project
+          </Button>
+        </IsEmpty>
+      );
     }
 
     return (
@@ -189,11 +189,7 @@ const Page = () => {
                   workspaceSlug: currentWorkspace.slug,
                 });
               }}
-              disabled={
-                !projectName.trim() ||
-                !projectDescription.trim() ||
-                createProject.isPending
-              }
+              disabled={!projectName.trim() || createProject.isPending}
             >
               {createProject.isPending ? "Creating..." : "Create Project"}
             </Button>
