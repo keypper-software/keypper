@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { ChevronsRight, Menu, X } from "lucide-react";
+import { ChevronsRight, LucideMoveRight, Menu, X } from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { AppRoute, Link } from "@/components/interface/link";
 import { useState } from "react";
@@ -27,6 +27,7 @@ import Fly from "@/components/icons/fly";
 import Railway from "@/components/icons/railway";
 import GitLab from "@/components/icons/gitlab";
 import Firebase from "@/components/icons/firebase";
+import { Button } from "@/components/interface/button";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -212,6 +213,89 @@ export default function Home() {
     },
   ];
 
+  const footerLinkGroups = [
+    {
+      title: "Product",
+      links: [
+        {
+          title: "Pricing",
+          href: "/pricing",
+        },
+        {
+          title: "CodeWatch",
+          href: "/codewatch",
+        },
+        {
+          title: "Dropp",
+          href: "/dropp",
+        },
+      ],
+    },
+    {
+      title: "Documentation",
+      links: [
+        {
+          title: "Getting Started",
+          href: "/docs",
+        },
+        {
+          title: "CLI",
+          href: "/docs/cli",
+        },
+        {
+          title: "API Playground",
+          href: "/docs/api-playground",
+        },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        {
+          title: "Blog",
+          href: "/blog",
+        },
+        {
+          title: "Changelog",
+          href: "/changelog",
+        },
+      ],
+    },
+    {
+      title: "Integrations",
+      links: [
+        {
+          title: "GitHub",
+          href: "/integrations/github",
+        },
+        {
+          title: "Vercel",
+          href: "/integrations/vercel",
+        },
+        {
+          title: "Netlify",
+          href: "/integrations/netlify",
+        },
+        {
+          title: "Supabase",
+          href: "/integrations/supabase",
+        },
+      ],
+    },
+    {
+      title: "Legal",
+      links: [
+        {
+          title: "Terms of Service",
+          href: "/terms",
+        },
+        {
+          title: "Privacy Policy",
+          href: "/privacy",
+        },
+      ],
+    },
+  ];
   return (
     <div className="">
       <div className="w-full bg-[#131c22] min-h-screen relative overflow-hidden">
@@ -471,6 +555,39 @@ export default function Home() {
                 >
                   <integration.logo fontSize={50} />
                   <span>{integration.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="border border-accent/30 rounded-4xl px-10 py-20 flex flex-col gap-y-4 items-center">
+            <img src="/logo/icon.png" alt="hero" className="w-[150px]" />
+            <h1 className="text-7xl font-semibold">
+              Ready to Secure Your Secrets?
+            </h1>
+            <Button className="px-16 mt-10 py-3 rounded-full !text-xl font-semibold flex items-center gap-x-2 group cursor-pointer">
+              Get Started
+              <LucideMoveRight className="group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
+          </div>
+          <div className="flex w-full gap-x-20 items-start bg-black/30 rounded-4xl p-10">
+            <img src="/logo/wordmark.png" alt="Keypper" className="w-[120px]" />
+            <div className="flex gap-x-20">
+              {footerLinkGroups.map((group, index) => (
+                <div key={index}>
+                  <h3 className="font-semibold text-gray-300 text-lg uppercase">
+                    {group.title}
+                  </h3>
+                  <div className="flex flex-col gap-y-1 mt-4">
+                    {group.links.map((link, index) => (
+                      <Link
+                        key={index}
+                        to={link.href as any}
+                        className="text-gray-300 hover:text-accent transition-colors"
+                      >
+                        {link.title}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
