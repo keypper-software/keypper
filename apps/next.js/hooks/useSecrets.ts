@@ -76,6 +76,11 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     return changes;
   };
 
+  const clearAndRefetch = ()=>{
+    setSecrets([]);
+    mutate()
+  }
+
   // const handleSaveChanges = useMutation({
   //   mutationFn: async () => {
   //     if (!getChangesCount()) return;
@@ -174,6 +179,7 @@ export function useSecrets(workspaceSlug: string, projectSlug: string) {
     getChangesCount,
     updating: false,
     saveChanges: parseEditedCode,
+    clearAndRefetch,
     handleDeleteSecret,
     undoDeleteSecret: removeDeleteSecret,
     fetchSecrets: mutate,

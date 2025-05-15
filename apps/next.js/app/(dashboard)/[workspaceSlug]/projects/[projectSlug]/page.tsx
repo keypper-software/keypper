@@ -21,8 +21,14 @@ const Page = () => {
   const { environment, environments, setEnvironment } = useEnvironmentStore();
   const [saveChangesLoading, setSaveChangesLoading] = useState(false);
 
-  const { secrets, secretsLoading, mutate, getChangesCount, saveChanges } =
-    useSecrets(currentWorkspace.name, projectSlug!);
+  const {
+    secrets,
+    secretsLoading,
+    mutate,
+    getChangesCount,
+    saveChanges,
+    clearAndRefetch,
+  } = useSecrets(currentWorkspace.name, projectSlug!);
 
   useEffect(() => {
     mutate();
@@ -38,6 +44,7 @@ const Page = () => {
       await api.put(`/${workspaceSlug}/${projectSlug}/secrets`, {
         secrets: changes,
       });
+      clearAndRefetch();
 
       toast.success("Changes saved successfully");
     } catch (error) {
