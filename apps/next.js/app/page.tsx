@@ -1,6 +1,12 @@
 "use client";
 import Image from "next/image";
-import { ChevronsRight, LucideMoveRight, Menu, X } from "lucide-react";
+import {
+  ChevronsRight,
+  Loader2Icon,
+  LucideMoveRight,
+  Menu,
+  X,
+} from "lucide-react";
 import { SiGithub } from "react-icons/si";
 import { AppRoute, Link } from "@/components/interface/link";
 import { useState } from "react";
@@ -45,7 +51,7 @@ export default function Home() {
     },
   ];
 
-  const { currentWorkspace, success, workspaces } = useUser();
+  const { currentWorkspace, success, workspaces, loading } = useUser();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -328,29 +334,37 @@ export default function Home() {
                 <span className="text-xs">6,942 stars</span>
               </div>
 
-              {!success ? (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-sm text-white hover:text-accent transition-colors font-semibold"
-                  >
-                    Sign in
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold"
-                  >
-                    Get Started
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  to={dashboardLink}
-                  className="bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold"
-                >
-                  Dashboard
-                </Link>
-              )}
+              <div className="">
+                {loading ? (
+                  <Loader2Icon className="animate-spin" />
+                ) : (
+                  <div className="">
+                    {!success ? (
+                      <>
+                        <Link
+                          to="/login"
+                          className="text-sm text-white hover:text-accent transition-colors font-semibold"
+                        >
+                          Sign in
+                        </Link>
+                        <Link
+                          to="/signup"
+                          className="bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold"
+                        >
+                          Get Started
+                        </Link>
+                      </>
+                    ) : (
+                      <Link
+                        to={dashboardLink}
+                        className="bg-accent text-black px-4 py-2 rounded-lg text-sm font-semibold"
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             <button className="md:hidden text-white" onClick={toggleMobileMenu}>

@@ -2,7 +2,7 @@
 import { Button } from "@/components/interface/button";
 import { getWorkspacesFn, Workspace } from "@/lib/apis/workspace";
 import { useQuery } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -32,52 +32,45 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const { workspaceSlug, projectSlug } = useParams();
 
   const isIgnored = IGNORE_PATHS.includes(pathname);
-
   const workspaces = useQuery({
     queryKey: ["workspaces"],
     queryFn: getWorkspacesFn,
     refetchOnWindowFocus: false,
-    // staleTime: Infinity,
-    // gcTime: 1000 * 60 * 60,
-    // retry: 1,
   });
 
   const allWorkspaces = workspaces?.data?.data || [];
 
-  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace>(
-    allWorkspaces?.[0] || {
-      id: Math.random().toString(36),
-      slug: workspaceSlug,
-      name: workspaceSlug,
-    }
+  const [currentWorkspace, setCurrentWorkspace] = useState<Workspace | null>(
+    null
   );
 
   useEffect(() => {
-    if (!isAxiosError(workspaces.error)) return;
-    if (workspaces.error.response?.status == 401) {
+    if ((workspaces?.error as AxiosError)?.response?.status === 401) {
       router.replace(`/login?continue=${pathname}`);
+      return;
     }
-
-    const matchingWorkspace = allWorkspaces?.find(
-      (workspace) =>
-        workspace.slug.toLowerCase() ===
-        String(workspaceSlug || "").toLowerCase()
-    );
 
     if (allWorkspaces?.length > 0) {
-      if (!!matchingWorkspace) {
-        return setCurrentWorkspace(matchingWorkspace);
+      const matchingWorkspace = allWorkspaces.find(
+        (workspace) =>
+          workspace.slug.toLowerCase() ===
+          String(workspaceSlug || "").toLowerCase()
+      );
+
+      if (matchingWorkspace) {
+        setCurrentWorkspace(matchingWorkspace);
+      } else {
+        // setCurrentWorkspace(allWorkspaces[0]);
       }
-      return setCurrentWorkspace(allWorkspaces[0]);
+    } else {
+      // router.replace("/onboarding")
+      // setCurrentWorkspace({
+      //   id: Math.random().toString(36).substring(2, 9),
+      //   slug: "/onboarding",
+      //   name: "onboarding",
+      // });
     }
-
-    setCurrentWorkspace({
-      id: Math.random().toString(36),
-      slug: "/onboarding",
-      name: "onboarding",
-    });
-
-  }, [workspaces.data, allWorkspaces, workspaceSlug, pathname]);
+  }, [allWorkspaces, workspaceSlug, pathname, router, workspaces.error]);
 
   if (!isIgnored && workspaces.isLoading) {
     return (
@@ -113,7 +106,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-  if (isWorkspaceNotFound()) {
+  if (!isIgnored && !currentWorkspace) {
     return (
       <div className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-900 to-black text-white p-4">
         <div className="bg-gray-800/70 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-gray-700/50 max-w-md w-full">
@@ -188,7 +181,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         error: workspaces.error,
         success: workspaces.isSuccess,
         workspaces: allWorkspaces,
-        currentWorkspace: currentWorkspace,
+        currentWorkspace: currentWorkspace!,
         projectSlug: String(projectSlug),
         workspaceSlug: String(workspaceSlug),
       }}
